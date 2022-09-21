@@ -16,6 +16,13 @@ class API:
             password: str,
             tfa_secret: str = None,
     ):
+        """
+        Peerberry API to execute all desired Peerberry functionalities via API calls
+        :param email: Email account was created with
+        :param password: Password account was created with
+        :param tfa_secret: Base32 secret used for two-factor authentication (Only mandatory if account has 2fa enabled)
+        """
+
         self.email = email
         self.__password = password
         self.__tfa_secret = tfa_secret
@@ -88,7 +95,7 @@ class API:
             url=f'{ENDPOINTS.PROFIT_OVERVIEW_URI}/{start_date}/{finish_date}/{periodicity}',
         )
 
-        return profit_overview if raw else pd.DataFrame(data=profit_overview)
+        return profit_overview if raw else pd.DataFrame(profit_overview)
 
     def get_investment_status(self) -> dict:
         """
@@ -136,6 +143,9 @@ class API:
         :return: All available loans for investment according to specified parameters
         """
 
+        if quantity <= 0:
+            raise ValueError('You need to fetch at least 1 loan.')
+
         if sort not in CONSTANTS.LOAN_SORT_TYPES:
             raise InvalidSort(f'Loans can only be sorted by: {", ".join(CONSTANTS.LOAN_SORT_TYPES)}')
 
@@ -172,7 +182,7 @@ class API:
         # Add country filters to query parameters
         if countries:
             for idx, country in enumerate(countries):
-                loan_params[f'countryIds[{idx}]'] = CONSTANTS.COUNTRIES_ISO[country]
+                loan_params[f'countryIds[{idx}]'] = CONSTANTS.COUNTRIES_ID[country]
 
         if originators:
             for idx, originator in enumerate(originators):
@@ -248,6 +258,119 @@ class API:
         )
 
         return f'Successfully invested €{amount} in loan {loan_id}.'
+
+    def get_investments(
+            self,
+            quantity: int,
+            max_date_of_purchase: int = None,
+            min_date_of_purchase: int = None,
+            max_interest_rate: float = None,
+            min_interest_rate: float = None,
+            max_invested_amount: float = None,
+            min_invested_amount: float = None,
+            countries: list = None,
+            loan_types: list = None,
+            sort: str = 'loan_amount',
+            ascending_sort: bool = False,
+            current: bool = True,
+            raw: bool = False,
+    ) -> Union[pd.DataFrame, list]:
+        """
+        Note:
+        If you're going to get a lot of investments at once, it's recommended to use the get_mass_investments
+        function, it'll import the data as an Excel and convert it to a pandas DataFrame or as a python list
+        :param quantity: Amount of investments to fetch
+        :param max_date_of_purchase: Set maximum date of purchase to fetch loan
+        :param min_date_of_purchase: Set minimum date of purchase to fetch loan
+        :param max_interest_rate: Set maximum interest rate to fetch loan
+        :param min_interest_rate: Set minimum interest rate to fetch loan
+        :param max_invested_amount: Set maximum invested amount to fetch loan
+        :param min_invested_amount: Set minimum invested amount to fetch loan
+        :param countries: Filter investments by country of origin (Gets investments from all countries by default)
+        :param loan_types: Filter investments by type (Short-term, long-term, real estate, leasing, and business)
+        :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
+        :param ascending_sort: Sort by ascending order (By default sorts in descending order)
+        :param current: Fetch current investments or finished investments (Gets current investments by default)
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: All available investments for investment according to specified parameters
+        """
+
+        if quantity <= 0:
+            raise ValueError('You need to fetch at least 1 investment.')
+
+        if sort not in CONSTANTS.LOAN_SORT_TYPES:
+            raise InvalidSort(f'Loans can only be sorted by: {", ".join(CONSTANTS.LOAN_SORT_TYPES)}')
+
+        investment_params = {
+            'sort': sort if ascending_sort else f'-{sort}',
+            'pageSize': 40 if quantity > 40 else quantity,
+            'type': 'CURRENT' if current else 'FINISHED',
+            'offset': 0,
+        }
+
+        if max_date_of_purchase is not None:
+            investment_params['maxDateOfPurchase'] = max_date_of_purchase
+
+        if min_date_of_purchase is not None:
+            investment_params['minDateOfPurchase'] = min_date_of_purchase
+
+        if max_interest_rate is not None:
+            investment_params['maxInterestRate'] = max_interest_rate
+
+        if min_interest_rate is not None:
+            investment_params['minInterestRate'] = min_interest_rate
+
+        if max_invested_amount is not None:
+            investment_params['maxAmount'] = max_invested_amount
+
+        if min_invested_amount is not None:
+            investment_params['minAmount'] = min_invested_amount
+
+        if countries:
+            for idx, country in enumerate(countries):
+                investment_params[f'countryIds[{idx}]'] = CONSTANTS.COUNTRIES_ID[country]
+
+        # Add loan type filters to query parameters
+        if loan_types:
+            for idx, type_ in enumerate(loan_types):
+                investment_params[f'loanTermId[{idx}]'] = CONSTANTS.LOAN_SORT_TYPES[type_]
+
+        investments_data = self.__session.request(
+            url=ENDPOINTS.INVESTMENTS_URI,
+            params=investment_params,
+        )['data']
+
+        return investments_data if raw else pd.DataFrame(investments_data)
+
+    def get_mass_investments(
+            self,
+            quantity: int,
+            sort: str = 'loan_amount',
+            ascending_sort: bool = False,
+            current: bool = True,
+    ) -> Union[pd.DataFrame, list]:
+        """
+        :param quantity:
+        :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
+        :param ascending_sort: Sort by ascending order (By default sorts in descending order)
+        :param current:
+        :return:
+        """
+        investment_params = {
+            'type': 'CURRENT' if current else 'FINISHED',
+            'lang': 'en',
+        }
+
+        investments = self.__session.request(
+            url=f'{ENDPOINTS.INVESTMENTS_URI}/export',
+            params=investment_params,
+            output='bytes',
+        )
+
+        # investment_data = pd.read_excel(
+        #     io=investments,
+        #     sheet_name='My investments' if current else 'Finished investments',
+        # ).sort_values(by=sort.value, ascending=ascending_sort).to_dict('records')
 
     def __get_access_token(self) -> str:
         login_data = {

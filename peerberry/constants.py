@@ -4,11 +4,22 @@ from typing import Generator
 class CONSTANTS:
     PERIODICITIES = {'day', 'month', 'year'}
 
-    COUNTRIES_ISO = {
+    OUTPUT_TYPES = {'json', 'bytes'}
+
+    LOAN_TYPES_ID = {
+        'short_term': 1,
+        'long_term': 2,
+        'real_estate': 3,
+        'leasing': 4,
+        'business': 5,
+    }
+
+    COUNTRIES_ID = {
         'Lithuania': 1,
         'Poland': 2,
         'Czech Republic': 63,
         'Kazakhstan': 118,
+        'Kenya': 119,
         'Moldova': 149,
         'Philippines': 178,
         'Romania': 185,

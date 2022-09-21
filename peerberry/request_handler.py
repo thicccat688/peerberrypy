@@ -1,4 +1,5 @@
 from peerberry.exceptions import PeerberryException
+from peerberry.constants import CONSTANTS
 from typing import Union, Type
 import requests
 
@@ -12,18 +13,29 @@ class RequestHandler:
             url: str,
             method: str = 'GET',
             exception_type: Type[Exception] = PeerberryException,
+            output_type: str = 'json',
             **kwargs,
     ) -> Union[list, dict]:
+        output_types = CONSTANTS.OUTPUT_TYPES
+        output_type = output_type.lower()
+
+        if output_type not in output_types:
+            raise ValueError(f'Output type must be one of the following: {", ".join(output_types)}')
+
         response = self.__session.request(
             method=method,
             url=url,
             **kwargs,
         )
 
-        parsed_response = response.json()
+        if output_type == 'bytes':
+            parsed_response = response.content
+
+        else:
+            parsed_response = response.json()
 
         if response.status_code >= 400:
-            raise exception_type(parsed_response['errors'][0]['message'])
+            raise exception_type(response.json()['errors'][0]['message'])
 
         return parsed_response
 
