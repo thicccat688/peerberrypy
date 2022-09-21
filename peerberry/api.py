@@ -1,6 +1,6 @@
 from peerberry.endpoints import ENDPOINTS
 from peerberry.request_handler import RequestHandler
-from peerberry.exceptions import InvalidCredentials, InvalidPeriodicity
+from peerberry.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort
 from peerberry.constants import CONSTANTS
 from datetime import date
 from typing import Union
@@ -25,11 +25,19 @@ class API:
         self.__session.add_header({'Authorization': self.__get_access_token()})
 
     def get_profile(self) -> dict:
+        """
+        :return: Basic information, accounts & balance information
+        """
+
         return self.__session.request(
             url=ENDPOINTS.PROFILE_URI,
         )
 
     def get_loyalty_tier(self) -> dict:
+        """
+        :return: Tier, extra return in percentage, the max amount and the minimum amount to be in the tier
+        """
+
         response = self.__session.request(
             url=ENDPOINTS.LOYALTY_URI,
         )
@@ -48,6 +56,10 @@ class API:
         }
 
     def get_overview(self) -> dict:
+        """
+        :return: Available balance, total invested, total profit, current investments, net annual return, etc.
+        """
+
         return self.__session.request(
             url=ENDPOINTS.OVERVIEW_URI,
         )
@@ -63,8 +75,8 @@ class API:
         :param start_date: First date of profit data
         :param finish_date: Final date of profit data
         :param periodicity: Intervals to get profit data from (Daily, monthly or on a yearly basis)
-        :param raw: Option to return raw python list or pandas DataFrame (False by default, so it returns a DataFrame)
-        :return: Returns profit overview for portfolio on a daily, monthly or yearly basis
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: Profit overview for portfolio on a daily, monthly or yearly basis
         """
 
         periodicites = CONSTANTS.PERIODICITIES
@@ -79,6 +91,10 @@ class API:
         return profit_overview if raw else pd.DataFrame(data=profit_overview)
 
     def get_investment_status(self) -> dict:
+        """
+        :return: Percentage of funds in current loans and late loans (In 1-15, 16-30, and 31-60 day intervals)
+        """
+
         return self.__session.request(
             url=ENDPOINTS.INVESTMENTS_STATUS_URI,
         )
@@ -86,21 +102,42 @@ class API:
     def get_loans(
             self,
             quantity: int,
+            max_remaining_term: int = None,
+            min_remaining_term: int = None,
+            max_interest_rate: float = None,
+            min_interest_rate: float = None,
+            max_available_amount: float = None,
+            min_available_amount: float = None,
             countries: list = None,
+            originators: list = None,
             loan_types: list = None,
             sort: str = 'loan_amount',
             ascending_sort: bool = False,
+            group_guarantee: bool = True,
+            exclude_invested_loans: bool = True,
             raw: bool = False,
     ) -> Union[pd.DataFrame, list]:
         """
         :param quantity: Amount of loans to fetch
+        :param max_remaining_term: Set maximum remaining term to fetch loan
+        :param min_remaining_term: Set minimum remaining term to fetch loan
+        :param max_interest_rate: Set maximum interest rate to fetch loan
+        :param min_interest_rate: Set minimum interest rate to fetch loan
+        :param max_available_amount: Set maximum available investment amount to fetch loan
+        :param min_available_amount: Set minimum available investment amount to fetch loan
         :param countries: Filter loans by country of origin (Gets loans from all countries by default)
+        :param originators: Filter loans by originator (Gets loans from all originators by default)
         :param loan_types: Filter loans by type (Short-term, long-term, real estate, leasing, and business)
         :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
         :param ascending_sort: Sort by ascending order (By default sorts in descending order)
-        :param raw: Option to return raw python list or pandas DataFrame (False by default, so it returns a DataFrame)
-        :return: Returns all available loans for investment according to specified parameters
+        :param group_guarantee: Restrict loans to only those with a group guarantee
+        :param exclude_invested_loans: Exclude loans that have been invested in previously
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: All available loans for investment according to specified parameters
         """
+
+        if sort not in CONSTANTS.LOAN_SORT_TYPES:
+            raise InvalidSort(f'Loans can only be sorted by: {", ".join(CONSTANTS.LOAN_SORT_TYPES)}')
 
         loan_params = {
             'sort': sort if ascending_sort else f'-{sort}',
@@ -108,10 +145,46 @@ class API:
             'offset': 0,
         }
 
+        if max_remaining_term is not None:
+            loan_params['maxRemainingTerm'] = max_remaining_term
+
+        if min_remaining_term is not None:
+            loan_params['minRemainingTerm'] = min_remaining_term
+
+        if max_interest_rate is not None:
+            loan_params['maxInterestRate'] = max_interest_rate
+
+        if min_interest_rate is not None:
+            loan_params['minInterestRate'] = min_interest_rate
+
+        if max_available_amount is not None:
+            loan_params['maxRemainingAmount'] = max_available_amount
+
+        if min_available_amount is not None:
+            loan_params['minRemainingAmount'] = min_available_amount
+
+        if group_guarantee is not None:
+            loan_params['groupGuarantee'] = 1
+
+        if exclude_invested_loans is not None:
+            loan_params['hideInvested'] = 1
+
         # Add country filters to query parameters
         if countries:
             for idx, country in enumerate(countries):
                 loan_params[f'countryIds[{idx}]'] = CONSTANTS.COUNTRIES_ISO[country]
+
+        if originators:
+            for idx, originator in enumerate(originators):
+                id_ = CONSTANTS.get_originators()[originator]
+
+                if isinstance(id_, list):
+                    for sub_id, originator_id in enumerate(id_):
+                        loan_params[f'loanOriginators[{idx+sub_id}]'] = originator_id
+
+                    continue
+
+                loan_params[f'loanOriginators[{idx}]'] = id_
 
         # Add loan type filters to query parameters
         if loan_types:
@@ -133,6 +206,29 @@ class API:
 
         return loans if raw else pd.DataFrame(loans)
 
+    def get_loan_details(
+            self,
+            loan_id: int,
+            raw: bool = False,
+    ) -> dict:
+        """
+        :param loan_id: ID of loan to get details of
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: The borrower's data, the loan's data, and the repayment schedule
+        """
+
+        credit_data = self.__session.request(
+            url=f'{ENDPOINTS.LOANS_URI}/{loan_id}',
+        )
+
+        schedule_data = credit_data['schedule']['data']
+
+        return {
+            'borrower_data': credit_data.get('borrower'),
+            'loan_data': credit_data.get('loan'),
+            'schedule_data': schedule_data if raw else pd.DataFrame(schedule_data),
+        }
+
     def purchase_loan(
             self,
             loan_id: int,
@@ -141,13 +237,14 @@ class API:
         """
         :param loan_id: ID of loan to purchase
         :param amount: Amount to invest in loan (Amount denominated in €)
-        :return: Returns success message upon purchasing loan
+        :return: Success message upon purchasing loan
         """
 
         self.__session.request(
             url=f'{ENDPOINTS.LOANS_URI}/{loan_id}',
             method='POST',
             data={'amount': str(amount)},
+            exception_type=InsufficientFunds,
         )
 
         return f'Successfully invested €{amount} in loan {loan_id}.'
@@ -193,9 +290,4 @@ client = API(
     tfa_secret='34KHNWOD326XBCEQIKRZ7HMDOY6WUY5A',
 )
 
-print(client.get_profile())
-print(client.get_overview())
-print(client.get_profit_overview(start_date=date(2022, 8, 21), finish_date=date(2022, 9, 21)))
-print(client.get_loyalty_tier())
-print(client.get_investment_status())
-print(client.get_loans(quantity=100))
+print(client.get_loans(quantity=100, originators=['Litelektra']))
