@@ -5,3 +5,16 @@ class ENDPOINTS:
     TFA_URI = f'{BASE_URI}/v1/investor/login/2fa'
 
     OVERVIEW_URI = f'{BASE_URI}/v1/investor/overview'
+    PROFIT_OVERVIEW_URI = f'{BASE_URI}/v1/investor/overview/profit'
+
+    LOYALTY_URI = f'{BASE_URI}/v1/investor/loyalty'
+    INVESTMENTS_STATUS_URI = f'{BASE_URI}/v2/investor/overview/investment_statuses/current'
+
+    PROFILE_URI = f'{BASE_URI}/v1/investor/profile'
+    PRIMARY_INVESTMENTS_URI = f'{BASE_URI}/v1/investor/investments'
+
+    SECONDARY_INVESTMENTS_URI = f'{BASE_URI}/v1/investor/investments'
+    LOANS_URI = f'{BASE_URI}/v1/loans'
+
+    CASH_FLOW_URI = f'{BASE_URI}/v2/investor/transactions'
+    CASH_FLOW_OVERVIEW_URI = f'{BASE_URI}/v2/investor/account-summary'
