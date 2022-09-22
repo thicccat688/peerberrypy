@@ -573,7 +573,7 @@ class API:
         tfa_response_token = login_response.get('tfa_token')
 
         if self.__tfa_secret is None:
-            return f'Bearer {tfa_response_token}'
+            return f'Bearer {login_response.get("access_token")}'
 
         totp_data = {
             'code': pyotp.TOTP(self.__tfa_secret).now(),
