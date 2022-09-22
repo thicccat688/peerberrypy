@@ -53,3 +53,41 @@ def test_loans():
         ),
         pd.DataFrame,
     )
+
+
+def test_loan_details():
+    assert isinstance(
+        peerberry_client.get_loan_details(
+            loan_id=1,
+            raw=False,
+        ),
+        pd.DataFrame,
+    )
+
+
+def test_investments():
+    assert isinstance(
+        peerberry_client.get_investments(
+            quantity=100,
+            current=True,
+            max_interest_rate=20,
+            min_interest_rate=10,
+            countries=['Kazakhstan', 'Lithuania'],
+            raw=False,
+        ),
+        pd.DataFrame,
+    )
+
+    assert isinstance(
+        peerberry_client.get_investments(
+            quantity=100,
+            current=False,
+            max_interest_rate=20,
+            min_interest_rate=10,
+            countries=['Kazakhstan', 'Lithuania'],
+            raw=False,
+        ),
+        pd.DataFrame,
+    )
+
+    assert isinstance(peerberry_client.get_mass_investments(raw=False), pd.DataFrame)

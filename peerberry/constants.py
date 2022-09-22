@@ -96,6 +96,20 @@ class CONSTANTS:
         'loan_amount': 'availableToInvest',
     }
 
+    LOAN_EXPORT_SORT_TYPES = {
+        'date_of_purchase': 'Date of purchase',
+        'interest_rate': 'Interest rate',
+        'invested_amount': 'Invested amount',
+        'estimated_final_payment_date': 'Estimated final payment date',
+        'estimated_next_principal_payment': 'Estimated next payment (principal)',
+        'estimated_next_interest_payment': 'Estimated next payment (interest)',
+        'term_until_estimated_payment_date': 'Left term till estimated payment date',
+        'received_payments': 'Received payments',
+        'last_received_payment_date': 'Last received payment date',
+        'remaining_principal': 'Remaining principal',
+        'status': 'Status',
+    }
+
     @classmethod
     def get_originators(cls) -> dict:
         return {k: v for (k, v) in cls.get_values(cls.ORIGINATORS_ID)}

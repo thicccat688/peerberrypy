@@ -1,11 +1,12 @@
 from peerberry.exceptions import PeerberryException
 from peerberry.constants import CONSTANTS
-from typing import Union, Type
+from typing import Type
 import requests
 
 
 class RequestHandler:
     def __init__(self):
+        """ Request handler for internal use with Peerberry's specifications. """
         self.__session = requests.Session()
 
     def request(
@@ -15,7 +16,7 @@ class RequestHandler:
             exception_type: Type[Exception] = PeerberryException,
             output_type: str = 'json',
             **kwargs,
-    ) -> Union[list, dict]:
+    ) -> any:
         output_types = CONSTANTS.OUTPUT_TYPES
         output_type = output_type.lower()
 

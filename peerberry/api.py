@@ -149,6 +149,8 @@ class API:
         if sort not in CONSTANTS.LOAN_SORT_TYPES:
             raise InvalidSort(f'Loans can only be sorted by: {", ".join(CONSTANTS.LOAN_SORT_TYPES)}')
 
+        sort = CONSTANTS.LOAN_SORT_TYPES[sort]
+
         loan_params = {
             'sort': sort if ascending_sort else f'-{sort}',
             'pageSize': 40 if quantity > 40 else quantity,
@@ -276,9 +278,8 @@ class API:
             raw: bool = False,
     ) -> Union[pd.DataFrame, list]:
         """
-        Note:
-        If you're going to get a lot of investments at once, it's recommended to use the get_mass_investments
-        function, it'll import the data as an Excel and convert it to a pandas DataFrame or as a python list
+        If you're going to fetch more than ~200 investments it's recommended to use the get_mass_investments function.
+        It provides more details about the investments, but has fewer filters available.
         :param quantity: Amount of investments to fetch
         :param max_date_of_purchase: Set maximum date of purchase to fetch loan
         :param min_date_of_purchase: Set minimum date of purchase to fetch loan
@@ -292,7 +293,7 @@ class API:
         :param ascending_sort: Sort by ascending order (By default sorts in descending order)
         :param current: Fetch current investments or finished investments (Gets current investments by default)
         :param raw: Returns python list if True or pandas DataFrame if False (False by default)
-        :return: All available investments for investment according to specified parameters
+        :return: All current or finished investments according to specified parameters
         """
 
         if quantity <= 0:
@@ -301,9 +302,11 @@ class API:
         if sort not in CONSTANTS.LOAN_SORT_TYPES:
             raise InvalidSort(f'Loans can only be sorted by: {", ".join(CONSTANTS.LOAN_SORT_TYPES)}')
 
+        sort = CONSTANTS.LOAN_SORT_TYPES[sort]
+
         investment_params = {
             'sort': sort if ascending_sort else f'-{sort}',
-            'pageSize': 40 if quantity > 40 else quantity,
+            'pageSize': quantity,
             'type': 'CURRENT' if current else 'FINISHED',
             'offset': 0,
         }
@@ -344,18 +347,29 @@ class API:
 
     def get_mass_investments(
             self,
-            quantity: int,
-            sort: str = 'loan_amount',
+            quantity: int = 100000000000,
+            sort: str = 'invested_amount',
             ascending_sort: bool = False,
             current: bool = True,
-    ) -> Union[pd.DataFrame, list]:
+            raw: bool = False,
+    ) -> Union[pd.DataFrame, bytes]:
         """
-        :param quantity:
+        This function has a lot better performance than the get_investments function and should be used when fetching
+        more than ~200 investment and has more detailed loan attributes, but has fewer filters available.
+        :param quantity: Amount of investments to fetch (If quantity is not specified it will fetch all investments)
         :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
         :param ascending_sort: Sort by ascending order (By default sorts in descending order)
-        :param current:
-        :return:
+        :param current: Fetch current investments or finished investments (Gets current investments by default)
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: All current or finished investments according to specified parameters
         """
+
+        if quantity <= 0:
+            raise ValueError('You need to fetch at least 1 investment.')
+
+        if sort not in CONSTANTS.LOAN_EXPORT_SORT_TYPES:
+            raise InvalidSort(f'Loans can only be sorted by: {", ".join(CONSTANTS.LOAN_EXPORT_SORT_TYPES)}')
+
         investment_params = {
             'type': 'CURRENT' if current else 'FINISHED',
             'lang': 'en',
@@ -364,13 +378,19 @@ class API:
         investments = self.__session.request(
             url=f'{ENDPOINTS.INVESTMENTS_URI}/export',
             params=investment_params,
-            output='bytes',
+            output_type='bytes',
         )
 
-        # investment_data = pd.read_excel(
-        #     io=investments,
-        #     sheet_name='My investments' if current else 'Finished investments',
-        # ).sort_values(by=sort.value, ascending=ascending_sort).to_dict('records')
+        sort = CONSTANTS.LOAN_EXPORT_SORT_TYPES[sort]
+
+        investment_data = pd.read_excel(
+            io=investments,
+            sheet_name='My investments' if current else 'Finished investments',
+        ).sort_values(by=sort, ascending=ascending_sort)
+
+        parsed_investment_data = investment_data[0:quantity]
+
+        return parsed_investment_data.to_dict('records') if raw else parsed_investment_data
 
     def __get_access_token(self) -> str:
         login_data = {
@@ -413,4 +433,4 @@ client = API(
     tfa_secret='34KHNWOD326XBCEQIKRZ7HMDOY6WUY5A',
 )
 
-print(client.get_loans(quantity=100, originators=['Litelektra']))
+print(client.get_mass_investments(current=False, quantity=20000))
