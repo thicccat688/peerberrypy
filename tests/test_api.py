@@ -6,9 +6,9 @@ import pandas as pd
 import os
 
 
-email = os.getenv(key='peerberry_email')
-password = os.getenv(key='peerberry_password')
-tfa_secret = os.getenv(key='peerberry_tfa_secret')
+email = os.getenv(key='PEERBERRY_EMAIL')
+password = os.getenv(key='PEERBERRY_PASSWORD')
+tfa_secret = os.getenv(key='PEERBERRY_TFA_SECRET')
 
 
 peerberry_client = API(
