@@ -4,6 +4,8 @@ from typing import Generator
 class CONSTANTS:
     PERIODICITIES = {'day', 'month', 'year'}
 
+    TRANSACTION_PERIODICITIES = {'today', 'thisWeek', 'thisMonth'}
+
     OUTPUT_TYPES = {'json', 'bytes'}
 
     LOAN_TYPES_ID = {
@@ -12,6 +14,19 @@ class CONSTANTS:
         'real_estate': 3,
         'leasing': 4,
         'business': 5,
+    }
+
+    TRANSACTION_TYPES = {
+        'deposit': 1,
+        'withdrawal': 2,
+        'principal_repayment': 3,
+        'interest_payment': 4,
+        'investment': 11,
+        'fees_and_bonuses': 16,
+    }
+
+    TRANSACTION_SORT_TYPES = {
+        'amount': 'Amount',
     }
 
     COUNTRIES_ID = {

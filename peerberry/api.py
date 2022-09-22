@@ -1,12 +1,13 @@
 from peerberry.endpoints import ENDPOINTS
 from peerberry.request_handler import RequestHandler
-from peerberry.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort
+from peerberry.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, InvalidType
 from peerberry.constants import CONSTANTS
 from datetime import date
 from typing import Union
 import pandas as pd
 import pyotp
 import math
+import time
 
 
 class API:
@@ -74,25 +75,25 @@ class API:
     def get_profit_overview(
             self,
             start_date: date,
-            finish_date: date,
+            end_date: date,
             periodicity: str = 'day',
             raw: bool = False,
     ) -> Union[pd.DataFrame, list]:
         """
-        :param start_date: First date of profit data
-        :param finish_date: Final date of profit data
+        :param start_date: Start date of profit data
+        :param end_date: End date of profit data
         :param periodicity: Intervals to get profit data from (Daily, monthly or on a yearly basis)
         :param raw: Returns python list if True or pandas DataFrame if False (False by default)
         :return: Profit overview for portfolio on a daily, monthly or yearly basis
         """
 
-        periodicites = CONSTANTS.PERIODICITIES
+        periodicities = CONSTANTS.PERIODICITIES
 
-        if periodicity not in periodicites:
-            raise InvalidPeriodicity(f'Periodicity must be one of the following: {", ".join(periodicites)}')
+        if periodicity not in periodicities:
+            raise InvalidPeriodicity(f'Periodicity must be one of the following: {", ".join(periodicities)}')
 
         profit_overview = self.__session.request(
-            url=f'{ENDPOINTS.PROFIT_OVERVIEW_URI}/{start_date}/{finish_date}/{periodicity}',
+            url=f'{ENDPOINTS.PROFIT_OVERVIEW_URI}/{start_date}/{end_date}/{periodicity}',
         )
 
         return profit_overview if raw else pd.DataFrame(profit_overview)
@@ -278,7 +279,7 @@ class API:
             raw: bool = False,
     ) -> Union[pd.DataFrame, list]:
         """
-        If you're going to fetch more than ~200 investments it's recommended to use the get_mass_investments function.
+        If you're going to fetch more than ~350 investments it's recommended to use the get_mass_investments function.
         It provides more details about the investments, but has fewer filters available.
         :param quantity: Amount of investments to fetch
         :param max_date_of_purchase: Set maximum date of purchase to fetch loan
@@ -354,13 +355,14 @@ class API:
             raw: bool = False,
     ) -> Union[pd.DataFrame, bytes]:
         """
-        This function has a lot better performance than the get_investments function and should be used when fetching
-        more than ~200 investment and has more detailed loan attributes, but has fewer filters available.
+        This function has a lot better performance than the get_investments function for larger quantities of
+        investments and should be used when fetching more than ~350 investment and has more detailed loan attributes,
+        but has fewer filters available.
         :param quantity: Amount of investments to fetch (If quantity is not specified it will fetch all investments)
         :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
         :param ascending_sort: Sort by ascending order (By default sorts in descending order)
         :param current: Fetch current investments or finished investments (Gets current investments by default)
-        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :param raw: Returns Excel bytes if True or pandas DataFrame if False (False by default)
         :return: All current or finished investments according to specified parameters
         """
 
@@ -385,12 +387,167 @@ class API:
 
         investment_data = pd.read_excel(
             io=investments,
-            sheet_name='My investments' if current else 'Finished investments',
+            sheet_name=0,
+        ).sort_values(by=sort, ascending=ascending_sort)[0:quantity]
+
+        return investments if raw else investment_data
+
+    def get_account_summary(
+            self,
+            start_date: date,
+            end_date: date,
+    ) -> dict:
+        account_params = {
+            'startDate': start_date,
+            'endDate': end_date,
+        }
+
+        summary_data = self.__session.request(
+            url=ENDPOINTS.ACCOUNT_SUMMARY_URI,
+            params=account_params,
+        )
+
+        return {
+            'balance_data': {
+                'opening_balance': summary_data.get('openingBalance'),
+                'opening_date': summary_data.get('openingDate'),
+                'closing_balance': summary_data.get('closingBalance'),
+                'closing_date': summary_data.get('closingDate'),
+            },
+            'cash_flow_data': {
+                'principal_payments': summary_data.get('PRINCIPAL'),
+                'interest_payments': summary_data.get('INTEREST'),
+                'investment_payments': summary_data.get('INVESTMENT'),
+                'deposits': summary_data.get('DEPOSIT'),
+                'withdrawals': summary_data.get('WITHDRAWLS'),
+            },
+            'currency': summary_data.get('currency'),
+        }
+
+    def get_transactions(
+            self,
+            quantity: int,
+            start_date: date,
+            end_date: date,
+            periodicity: str = None,
+            transaction_types: list = None,
+            raw: bool = False,
+    ) -> Union[pd.DataFrame, list]:
+        """
+        If you want the transactions' Excel bytes use the get_mass_transactions function.
+        The get_transactions function should be used for any other use case since it is much faster.
+        It provides more details about the transactions, but has fewer filters available and is slower.
+        :param quantity: Amount of investments to fetch (If quantity is not specified it will fetch all investments)
+        :param start_date: Start date of transaction data
+        :param end_date: End date of transaction data
+        :param periodicity: Specific periodicity filter (today, this week, and this month)
+        :param transaction_types: Types of transactions to fetch (By default gets all transaction types)
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: All transactions according to specified parameters
+        """
+
+        transactions_params = {
+            'pageSize': quantity,
+            'startDate': start_date,
+            'endDate': end_date,
+            'offset': 0,
+        }
+
+        if transaction_types is not None:
+            types_ = CONSTANTS.TRANSACTION_TYPES
+
+            for idx, type_ in enumerate(transaction_types):
+                if type_ not in types_:
+                    raise InvalidType(f'You can only get the following types {", ".join(types_)}')
+
+                type_id = types_[type_]
+
+                transactions_params[f'transactionType[{idx}]'] = type_id
+
+        if periodicity is not None:
+            periodicities = CONSTANTS.TRANSACTION_PERIODICITIES
+
+            if periodicity not in periodicities:
+                raise InvalidPeriodicity(f'Periodicity must be one of the following: {", ".join(periodicities)}')
+
+            transactions_params['periodicity'] = periodicity
+
+        transactions_data = self.__session.request(
+            url=ENDPOINTS.CASH_FLOW_URI,
+            params=transactions_params,
+        )
+
+        return transactions_data if raw else pd.DataFrame(transactions_data)
+
+    def get_mass_transactions(
+            self,
+            quantity: int,
+            start_date: date,
+            end_date: date,
+            transaction_types: list = None,
+            periodicity: str = None,
+            sort: str = 'amount',
+            ascending_sort: bool = False,
+            raw: bool = False,
+    ) -> Union[pd.DataFrame, bytes]:
+        """
+        This function has a lot worse performance than the get_transactions function and should only be used
+        when trying to get the transactions' Excel bytes.
+        :param quantity: Amount of investments to fetch (If quantity is not specified it will fetch all investments)
+        :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
+        :param ascending_sort: Sort by ascending order (By default sorts in descending order)
+        :param start_date: Start date of transaction data
+        :param end_date: End date of transaction data
+        :param periodicity: Specific periodicity filter (today, this week, and this month)
+        :param transaction_types: Types of transactions to fetch (By default gets all transaction types)
+        :param raw: Returns Excel bytes if True or pandas DataFrame if False (False by default)
+        :return: All transactions according to specified parameters
+        """
+
+        types_ = CONSTANTS.TRANSACTION_SORT_TYPES
+
+        if sort not in types_:
+            raise InvalidSort(f'You can only sort by the following attributes: {", ".join(types_)}')
+
+        sort = CONSTANTS.TRANSACTION_SORT_TYPES[sort]
+
+        transactions_params = {
+            'startDate': start_date,
+            'endDate': end_date,
+            'lang': 'en',
+        }
+
+        if transaction_types is not None:
+            types_ = CONSTANTS.TRANSACTION_TYPES
+
+            for idx, type_ in enumerate(transaction_types):
+                if type_ not in types_:
+                    raise InvalidType(f'You can only get the following types {", ".join(types_)}')
+
+                type_id = types_[type_]
+
+                transactions_params[f'transactionType[{idx}]'] = type_id
+
+        if periodicity is not None:
+            periodicities = CONSTANTS.TRANSACTION_PERIODICITIES
+
+            if periodicity not in periodicities:
+                raise InvalidPeriodicity(f'Periodicity must be one of the following: {", ".join(periodicities)}')
+
+            transactions_params['periodicity'] = periodicity
+
+        transactions_data = self.__session.request(
+            url=f'{ENDPOINTS.CASH_FLOW_URI}/import',
+            params=transactions_params,
+            output_type='bytes',
+        )
+
+        parsed_transactions_data = pd.read_excel(
+            io=transactions_data,
+            sheet_name=0,
         ).sort_values(by=sort, ascending=ascending_sort)
 
-        parsed_investment_data = investment_data[0:quantity]
-
-        return parsed_investment_data.to_dict('records') if raw else parsed_investment_data
+        return transactions_data if raw else parsed_transactions_data[0:quantity]
 
     def __get_access_token(self) -> str:
         login_data = {
@@ -432,5 +589,3 @@ client = API(
     password='%kPevYbI6faQ0165pc24',
     tfa_secret='34KHNWOD326XBCEQIKRZ7HMDOY6WUY5A',
 )
-
-print(client.get_mass_investments(current=False, quantity=20000))

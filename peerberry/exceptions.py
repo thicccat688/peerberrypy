@@ -14,5 +14,9 @@ class InvalidSort(Exception):
     pass
 
 
+class InvalidType(Exception):
+    pass
+
+
 class PeerberryException(Exception):
     pass

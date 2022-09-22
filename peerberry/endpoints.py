@@ -16,4 +16,4 @@ class ENDPOINTS:
     LOANS_URI = f'{BASE_URI}/v1/loans'
 
     CASH_FLOW_URI = f'{BASE_URI}/v2/investor/transactions'
-    CASH_FLOW_OVERVIEW_URI = f'{BASE_URI}/v2/investor/account-summary'
+    ACCOUNT_SUMMARY_URI = f'{BASE_URI}/v2/investor/account-summary'
