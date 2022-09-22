@@ -1,4 +1,6 @@
+from tests.constants import CONSTANTS
 from peerberry.api import API
+
 from datetime import date
 import pandas as pd
 
@@ -31,7 +33,7 @@ def test_profit_overview():
     assert isinstance(
         peerberry_client.get_profit_overview(
             start_date=date(2022, 8, 21),
-            finish_date=date(2022, 9, 21),
+            end_date=date(2022, 9, 21),
             periodicity='day',
             raw=False,
         ),
@@ -91,3 +93,35 @@ def test_investments():
     )
 
     assert isinstance(peerberry_client.get_mass_investments(raw=False), pd.DataFrame)
+
+
+def test_summary():
+    assert isinstance(
+        peerberry_client.get_account_summary(
+            start_date=CONSTANTS.START_DATE,
+            end_date=CONSTANTS.END_DATE,
+        ),
+        dict,
+    )
+
+
+def test_transactions():
+    assert isinstance(
+        peerberry_client.get_transactions(
+            quantity=1000,
+            start_date=CONSTANTS.START_DATE,
+            end_date=CONSTANTS.END_DATE,
+            raw=False,
+        ),
+        pd.DataFrame,
+    )
+
+    assert isinstance(
+        peerberry_client.get_mass_transactions(
+            quantity=1000,
+            start_date=CONSTANTS.START_DATE,
+            end_date=CONSTANTS.END_DATE,
+            raw=False,
+        ),
+        pd.DataFrame,
+    )

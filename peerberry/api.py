@@ -7,7 +7,6 @@ from typing import Union
 import pandas as pd
 import pyotp
 import math
-import time
 
 
 class API:
@@ -397,6 +396,12 @@ class API:
             start_date: date,
             end_date: date,
     ) -> dict:
+        """
+        :param start_date: Start date of account summary
+        :param end_date: End date of account summary
+        :return: Summary of transactions during the specified time period (Invested funds, interest payments, etc.)
+        """
+
         account_params = {
             'startDate': start_date,
             'endDate': end_date,
@@ -550,6 +555,9 @@ class API:
         return transactions_data if raw else parsed_transactions_data[0:quantity]
 
     def __get_access_token(self) -> str:
+        """
+        :return: Access token to authenticate to Peerberry API
+        """
         login_data = {
             'email': self.email,
             'password': self.__password,
@@ -582,10 +590,3 @@ class API:
 
         # Set authorization header with JWT bearer token
         return f'Bearer {access_token}'
-
-
-client = API(
-    email='marcoperestrello@gmail.com',
-    password='%kPevYbI6faQ0165pc24',
-    tfa_secret='34KHNWOD326XBCEQIKRZ7HMDOY6WUY5A',
-)
