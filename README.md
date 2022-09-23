@@ -36,6 +36,10 @@ api_client = API(
   tfa_secret='YOUR BASE32 TFA SECRET HERE',  # This is only required if you have two-factor authentication enabled on your account
 )
 
+# Gets investor profile data
+print(api_client.get_profile())
+```
+
 API functions:
 
 Investor/portfolio data functions:
@@ -61,7 +65,6 @@ Transaction data functions:
   
 Authentication functions:
   logout -> Logs out of Peerberry and revokes your access token. Recommended to use after you finish all your operations.
-```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
