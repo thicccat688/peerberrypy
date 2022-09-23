@@ -555,7 +555,18 @@ class API:
         return transactions_data if raw else parsed_transactions_data[0:quantity]
 
     def logout(self) -> str:
-        pass
+        """
+        :return: Success message upon logging out.
+        """
+
+        self.__session.request(
+            url=ENDPOINTS.LOGOUT_URI,
+        )
+
+        # Remove revoked authorization header
+        self.__session.remove_header('Authorization')
+
+        return 'Successfully logged out.'
 
     def __get_access_token(self) -> str:
         """

@@ -36,7 +36,14 @@ class RequestHandler:
             parsed_response = response.json()
 
         if response.status_code >= 400:
-            raise exception_type(response.json()['errors'][0]['message'])
+            error_response = response.json()
+
+            raise exception_type(
+                {
+                    'status_code': error_response['errors'][0]['statusCode'],
+                    'message': response.json()['errors'][0]['message'],
+                }
+            )
 
         return parsed_response
 
@@ -45,5 +52,10 @@ class RequestHandler:
 
     def add_header(self, header: dict) -> object:
         self.__session.headers.update(header)
+
+        return self.get_headers()
+
+    def remove_header(self, key: str) -> object:
+        self.__session.headers.pop(key, None)
 
         return self.get_headers()
