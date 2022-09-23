@@ -40,7 +40,7 @@ api_client = API(
 print(api_client.get_profile())
 ```
 
-# API functions
+## API functions
 
 <pre>
 Investor/portfolio data functions:
