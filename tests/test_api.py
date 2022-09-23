@@ -64,7 +64,7 @@ def test_loan_details():
             loan_id=1,
             raw=False,
         ),
-        pd.DataFrame,
+        dict,
     )
 
 

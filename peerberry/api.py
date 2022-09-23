@@ -224,7 +224,7 @@ class API:
             raw: bool = False,
     ) -> dict:
         """
-        :param loan_id: ID of loan to get details of
+        :param loan_id: ID of loan to get details from
         :param raw: Returns python list if True or pandas DataFrame if False (False by default)
         :return: The borrower's data, the loan's data, and the repayment schedule
         """
@@ -236,8 +236,8 @@ class API:
         schedule_data = credit_data['schedule']['data']
 
         return {
-            'borrower_data': credit_data.get('borrower'),
-            'loan_data': credit_data.get('loan'),
+            'borrower_data': credit_data['borrower'],
+            'loan_data': credit_data['loan'],
             'schedule_data': schedule_data if raw else pd.DataFrame(schedule_data),
         }
 
@@ -553,6 +553,9 @@ class API:
         ).sort_values(by=sort, ascending=ascending_sort)
 
         return transactions_data if raw else parsed_transactions_data[0:quantity]
+
+    def logout(self) -> str:
+        pass
 
     def __get_access_token(self) -> str:
         """
