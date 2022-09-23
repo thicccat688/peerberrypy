@@ -40,9 +40,9 @@ api_client = API(
 print(api_client.get_profile())
 ```
 
-<pre>
-API functions:
+# API functions
 
+<pre>
 Investor/portfolio data functions:
   get_profile -> Gets investor profile.
   get_loyalty_tier -> Gets loyalty tier, tier requirements, and the tier's benefits.
