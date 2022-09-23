@@ -40,6 +40,7 @@ api_client = API(
 print(api_client.get_profile())
 ```
 
+<pre>
 API functions:
 
 Investor/portfolio data functions:
@@ -65,6 +66,7 @@ Transaction data functions:
   
 Authentication functions:
   logout -> Logs out of Peerberry and revokes your access token. Recommended to use after you finish all your operations.
+</pre>
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
