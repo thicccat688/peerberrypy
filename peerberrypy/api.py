@@ -420,11 +420,11 @@ class API:
                 'closing_date': summary_data.get('closingDate'),
             },
             'cash_flow_data': {
-                'principal_payments': summary_data.get('PRINCIPAL'),
-                'interest_payments': summary_data.get('INTEREST'),
-                'investment_payments': summary_data.get('INVESTMENT'),
-                'deposits': summary_data.get('DEPOSIT'),
-                'withdrawals': summary_data.get('WITHDRAWLS'),
+                'principal_payments': summary_data['operations'].get('PRINCIPAL'),
+                'interest_payments': summary_data['operations'].get('INTEREST'),
+                'investment_payments': summary_data['operations'].get('INVESTMENT'),
+                'deposits': summary_data['operations'].get('DEPOSIT'),
+                'withdrawals': summary_data['operations'].get('WITHDRAWLS'),
             },
             'currency': summary_data.get('currency'),
         }
