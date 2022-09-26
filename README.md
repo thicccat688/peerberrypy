@@ -68,7 +68,7 @@ Authentication functions:
   logout -> Logs out of Peerberry and revokes your access token. Recommended to use after you finish all your operations.
 
 Note:
-The authentication logic is executed automatically upon initializing the API instance, only logout needs to be done manually.
+The login is executed automatically upon initializing the API instance, only logout needs to be done manually (Login is still possible to do manually, but not recommended).
 </pre>
 
 ## Contributing
