@@ -576,7 +576,7 @@ class API:
         if self.__tfa_secret is None:
             access_token = login_response.get('access_token')
 
-            self.__session.add_header({'Authorization': access_token})
+            self.__session.add_header({'Authorization': f'Bearer {access_token}'})
 
             return f'Bearer {access_token}'
 
@@ -593,7 +593,7 @@ class API:
 
         access_token = totp_response.get('access_token')
 
-        self.__session.add_header({'Authorization': access_token})
+        self.__session.add_header({'Authorization': f' Bearer {access_token}'})
 
         # Set authorization header with JWT bearer token
         return f'Bearer {access_token}'
