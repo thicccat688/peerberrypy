@@ -558,6 +558,7 @@ class API:
         """
         :return: Access token to authenticate to Peerberry API
         """
+
         login_data = {
             'email': self.email,
             'password': self.__password,
