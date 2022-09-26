@@ -1,5 +1,5 @@
-from peerberry.exceptions import PeerberryException
-from peerberry.constants import CONSTANTS
+from peerberrypy.exceptions import PeerberryException
+from peerberrypy.constants import CONSTANTS
 from typing import Type
 import requests
 

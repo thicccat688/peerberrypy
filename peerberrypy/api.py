@@ -1,7 +1,7 @@
-from peerberry.endpoints import ENDPOINTS
-from peerberry.request_handler import RequestHandler
-from peerberry.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, InvalidType
-from peerberry.constants import CONSTANTS
+from peerberrypy.endpoints import ENDPOINTS
+from peerberrypy.request_handler import RequestHandler
+from peerberrypy.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, InvalidType
+from peerberrypy.constants import CONSTANTS
 from datetime import date
 from typing import Union
 import pandas as pd
