@@ -67,21 +67,14 @@ Transaction data functions:
 Authentication functions:
   login -> Logs in to Peerberry's API and assigns your session an access token. Use is not recommended as it's done automatically when initializing API instance.
   logout -> Logs out of Peerberry and revokes your access token. Recommended to use after you finish all your operations.
-<<<<<<< HEAD
-=======
 
 Note:
-<<<<<<< HEAD
 The authentication logic is executed automatically upon initializing the API instance, only logout needs to be done manually.
->>>>>>> ff7095d841915113f468c680437476b93cb9f777
-=======
 The login is executed automatically upon initializing the API instance, only logout needs to be done manually (Login is still possible to do manually, but not recommended).
->>>>>>> fcfe90135c71e0bd89bb2fe937d0d1715538933b
 </pre>
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
 Please make sure to update tests as appropriate.
 
 ## License
