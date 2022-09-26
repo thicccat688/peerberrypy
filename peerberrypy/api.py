@@ -414,17 +414,17 @@ class API:
 
         return {
             'balance_data': {
-                'opening_balance': summary_data.get('openingBalance'),
+                'opening_balance': float(summary_data.get('openingBalance')),
                 'opening_date': summary_data.get('openingDate'),
-                'closing_balance': summary_data.get('closingBalance'),
+                'closing_balance': float(summary_data.get('closingBalance')),
                 'closing_date': summary_data.get('closingDate'),
             },
             'cash_flow_data': {
-                'principal_payments': summary_data['operations'].get('PRINCIPAL'),
-                'interest_payments': summary_data['operations'].get('INTEREST'),
-                'investment_payments': summary_data['operations'].get('INVESTMENT'),
-                'deposits': summary_data['operations'].get('DEPOSIT'),
-                'withdrawals': summary_data['operations'].get('WITHDRAWAL'),
+                'principal_payments': float(summary_data['operations'].get('PRINCIPAL')),
+                'interest_payments': float(summary_data['operations'].get('INTEREST')),
+                'investment_payments': float(summary_data['operations'].get('INVESTMENT')),
+                'deposits': float(summary_data['operations'].get('DEPOSIT')),
+                'withdrawals': float(summary_data['operations'].get('WITHDRAWAL')),
             },
             'currency': summary_data.get('currency'),
         }
