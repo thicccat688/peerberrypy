@@ -27,9 +27,9 @@ class API:
         self.__password = password
         self.__tfa_secret = tfa_secret
 
-        # Initialize API session, authenticate & get access token
+        # Initialize HTTP session & authenticate to API
         self.__session = RequestHandler()
-        self.__session.add_header({'Authorization': self.__get_access_token()})
+        self.login()
 
     def get_profile(self) -> dict:
         """
@@ -554,21 +554,7 @@ class API:
 
         return transactions_data if raw else parsed_transactions_data[0:quantity]
 
-    def logout(self) -> str:
-        """
-        :return: Success message upon logging out.
-        """
-
-        self.__session.request(
-            url=ENDPOINTS.LOGOUT_URI,
-        )
-
-        # Remove revoked authorization header
-        self.__session.remove_header('Authorization')
-
-        return 'Successfully logged out.'
-
-    def __get_access_token(self) -> str:
+    def login(self) -> str:
         """
         :return: Access token to authenticate to Peerberry API
         """
@@ -587,7 +573,11 @@ class API:
         tfa_response_token = login_response.get('tfa_token')
 
         if self.__tfa_secret is None:
-            return f'Bearer {login_response.get("access_token")}'
+            access_token = login_response.get('access_token')
+
+            self.__session.add_header({'Authorization': access_token})
+
+            return f'Bearer {access_token}'
 
         totp_data = {
             'code': pyotp.TOTP(self.__tfa_secret).now(),
@@ -602,5 +592,21 @@ class API:
 
         access_token = totp_response.get('access_token')
 
+        self.__session.add_header({'Authorization': access_token})
+
         # Set authorization header with JWT bearer token
         return f'Bearer {access_token}'
+
+    def logout(self) -> str:
+        """
+        :return: Success message upon logging out.
+        """
+
+        self.__session.request(
+            url=ENDPOINTS.LOGOUT_URI,
+        )
+
+        # Remove revoked authorization header
+        self.__session.remove_header('Authorization')
+
+        return 'Successfully logged out.'
