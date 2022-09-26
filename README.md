@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## Peerberrypy
 
 The peerberrypy package is a Python API wrapper for the Peerberry platform.
