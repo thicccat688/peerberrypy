@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 ## peerberryapi
 
 The peerberryapi package is a Python API wrapper for the Peerberry platform.
+=======
+## Peerberrypy
+
+The peerberrypy package is a Python API wrapper for the Peerberry platform.
+>>>>>>> ff7095d841915113f468c680437476b93cb9f777
 Peerberry currently has no API documentation and some endpoints could be simplified/optimized, which is one of the main goals of this project.
 
 Peerberry platform: https://peerberry.com/
@@ -20,13 +26,21 @@ Main dependencies:
 ## Installation
 
 ```bash
+<<<<<<< HEAD
 pip install peerberryapi
+=======
+pip install peerberrypy
+>>>>>>> ff7095d841915113f468c680437476b93cb9f777
 ```
 
 ## Usage
 
 ```python
+<<<<<<< HEAD
 from peerberryapi import API
+=======
+from peerberrypy import API
+>>>>>>> ff7095d841915113f468c680437476b93cb9f777
 
 
 # Authenticate to the API client (You won't need to manually authenticate again after this)
@@ -66,6 +80,12 @@ Transaction data functions:
   
 Authentication functions:
   logout -> Logs out of Peerberry and revokes your access token. Recommended to use after you finish all your operations.
+<<<<<<< HEAD
+=======
+
+Note:
+The authentication logic is executed automatically upon initializing the API instance, only logout needs to be done manually.
+>>>>>>> ff7095d841915113f468c680437476b93cb9f777
 </pre>
 
 ## Contributing

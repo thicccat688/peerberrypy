@@ -1,5 +1,9 @@
 from tests.constants import CONSTANTS
+<<<<<<< HEAD
 from peerberry.api import API
+=======
+from peerberrypy.api import API
+>>>>>>> ff7095d841915113f468c680437476b93cb9f777
 
 from datetime import date
 import pandas as pd
@@ -126,7 +130,10 @@ def test_transactions():
         ),
         pd.DataFrame,
     )
+<<<<<<< HEAD
 
 
 def test_logout():
     assert isinstance(peerberry_client.logout(), str)
+=======
+>>>>>>> ff7095d841915113f468c680437476b93cb9f777
