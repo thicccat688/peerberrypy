@@ -126,3 +126,7 @@ def test_transactions():
         ),
         pd.DataFrame,
     )
+
+
+def test_logout():
+    assert isinstance(peerberry_client.logout(), str)
