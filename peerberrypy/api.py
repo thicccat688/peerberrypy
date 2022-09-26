@@ -424,7 +424,7 @@ class API:
                 'interest_payments': summary_data['operations'].get('INTEREST'),
                 'investment_payments': summary_data['operations'].get('INVESTMENT'),
                 'deposits': summary_data['operations'].get('DEPOSIT'),
-                'withdrawals': summary_data['operations'].get('WITHDRAWLS'),
+                'withdrawals': summary_data['operations'].get('WITHDRAWAL'),
             },
             'currency': summary_data.get('currency'),
         }
