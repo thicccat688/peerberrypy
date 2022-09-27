@@ -57,7 +57,7 @@ class API:
 
         return {
             'tier': top_available_tier['title'].rstrip(),
-            'extra_return': top_available_tier['percent'],
+            'extra_return': f'{top_available_tier["percent"]}%',
             'max_amount': top_available_tier['maxAmount'],
             'min_amount': top_available_tier['minAmount'],
         }
@@ -291,7 +291,7 @@ class API:
         :param loan_types: Filter investments by type (Short-term, long-term, real estate, leasing, and business)
         :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
         :param ascending_sort: Sort by ascending order (By default sorts in descending order)
-        :param current: Fetch current investments or finished investments (Gets current investments by default)
+        :param current: Fetch current or finished investments (Set to False to fetch finished investments)
         :param raw: Returns python list if True or pandas DataFrame if False (False by default)
         :return: All current or finished investments according to specified parameters
         """
