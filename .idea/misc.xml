@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (peerberry_api)" project-jdk-type="Python SDK" />
+=======
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (peerberryapi)" project-jdk-type="Python SDK" />
+>>>>>>> ff7095d841915113f468c680437476b93cb9f777
 </project>

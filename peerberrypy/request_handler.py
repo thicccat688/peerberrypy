@@ -36,13 +36,12 @@ class RequestHandler:
             parsed_response = response.json()
 
         if response.status_code >= 400:
-            error_response = response.json()
+            error_response = response.json()['errors']
 
-            try:
-                raise exception_type(error_response['errors'][0]['message'])
+            if isinstance(error_response, list):
+                raise exception_type(list(error_response[0].values())[0])
 
-            except KeyError:
-                raise exception_type(list(error_response['errors'].values())[0])
+            raise exception_type(list(error_response.values())[0])
 
         return parsed_response
 

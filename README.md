@@ -65,15 +65,16 @@ Transaction data functions:
   get_mass_transactions -> Gets transactions either as an Excel or as a Pandas DataFrame.
   
 Authentication functions:
+  login -> Logs in to Peerberry's API and assigns your session an access token. Use is not recommended as it's done automatically when initializing API instance.
   logout -> Logs out of Peerberry and revokes your access token. Recommended to use after you finish all your operations.
 
 Note:
 The authentication logic is executed automatically upon initializing the API instance, only logout needs to be done manually.
+The login is executed automatically upon initializing the API instance, only logout needs to be done manually (Login is still possible to do manually, but not recommended).
 </pre>
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
 Please make sure to update tests as appropriate.
 
 ## License

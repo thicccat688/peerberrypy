@@ -27,9 +27,9 @@ class API:
         self.__password = password
         self.__tfa_secret = tfa_secret
 
-        # Initialize API session, authenticate & get access token
+        # Initialize HTTP session & authenticate to API
         self.__session = RequestHandler()
-        self.__session.add_header({'Authorization': self.__get_access_token()})
+        self.login()
 
     def get_profile(self) -> dict:
         """
@@ -57,7 +57,7 @@ class API:
 
         return {
             'tier': top_available_tier['title'].rstrip(),
-            'extra_return': top_available_tier['percent'],
+            'extra_return': f'{top_available_tier["percent"]}%',
             'max_amount': top_available_tier['maxAmount'],
             'min_amount': top_available_tier['minAmount'],
         }
@@ -291,7 +291,7 @@ class API:
         :param loan_types: Filter investments by type (Short-term, long-term, real estate, leasing, and business)
         :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
         :param ascending_sort: Sort by ascending order (By default sorts in descending order)
-        :param current: Fetch current investments or finished investments (Gets current investments by default)
+        :param current: Fetch current or finished investments (Set to False to fetch finished investments)
         :param raw: Returns python list if True or pandas DataFrame if False (False by default)
         :return: All current or finished investments according to specified parameters
         """
@@ -414,17 +414,17 @@ class API:
 
         return {
             'balance_data': {
-                'opening_balance': summary_data.get('openingBalance'),
+                'opening_balance': float(summary_data.get('openingBalance')),
                 'opening_date': summary_data.get('openingDate'),
-                'closing_balance': summary_data.get('closingBalance'),
+                'closing_balance': float(summary_data.get('closingBalance')),
                 'closing_date': summary_data.get('closingDate'),
             },
             'cash_flow_data': {
-                'principal_payments': summary_data.get('PRINCIPAL'),
-                'interest_payments': summary_data.get('INTEREST'),
-                'investment_payments': summary_data.get('INVESTMENT'),
-                'deposits': summary_data.get('DEPOSIT'),
-                'withdrawals': summary_data.get('WITHDRAWLS'),
+                'principal_payments': float(summary_data['operations'].get('PRINCIPAL')),
+                'interest_payments': float(summary_data['operations'].get('INTEREST')),
+                'investment_payments': float(summary_data['operations'].get('INVESTMENT')),
+                'deposits': float(summary_data['operations'].get('DEPOSIT')),
+                'withdrawals': float(summary_data['operations'].get('WITHDRAWAL')),
             },
             'currency': summary_data.get('currency'),
         }
@@ -554,24 +554,11 @@ class API:
 
         return transactions_data if raw else parsed_transactions_data[0:quantity]
 
-    def logout(self) -> str:
-        """
-        :return: Success message upon logging out.
-        """
-
-        self.__session.request(
-            url=ENDPOINTS.LOGOUT_URI,
-        )
-
-        # Remove revoked authorization header
-        self.__session.remove_header('Authorization')
-
-        return 'Successfully logged out.'
-
-    def __get_access_token(self) -> str:
+    def login(self) -> str:
         """
         :return: Access token to authenticate to Peerberry API
         """
+
         login_data = {
             'email': self.email,
             'password': self.__password,
@@ -587,7 +574,11 @@ class API:
         tfa_response_token = login_response.get('tfa_token')
 
         if self.__tfa_secret is None:
-            return f'Bearer {login_response.get("access_token")}'
+            access_token = login_response.get('access_token')
+
+            self.__session.add_header({'Authorization': f'Bearer {access_token}'})
+
+            return f'Bearer {access_token}'
 
         totp_data = {
             'code': pyotp.TOTP(self.__tfa_secret).now(),
@@ -602,5 +593,21 @@ class API:
 
         access_token = totp_response.get('access_token')
 
+        self.__session.add_header({'Authorization': f'Bearer {access_token}'})
+
         # Set authorization header with JWT bearer token
         return f'Bearer {access_token}'
+
+    def logout(self) -> str:
+        """
+        :return: Success message upon logging out.
+        """
+
+        self.__session.request(
+            url=ENDPOINTS.LOGOUT_URI,
+        )
+
+        # Remove revoked authorization header
+        self.__session.remove_header('Authorization')
+
+        return 'Successfully logged out.'
