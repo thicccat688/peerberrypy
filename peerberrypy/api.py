@@ -17,7 +17,7 @@ class API:
             tfa_secret: str = None,
     ):
         """
-        Peerberry API to execute all desired Peerberry functionalities via API calls
+        Peerberry API wrapper with all relevant Peerberry functionalities.
         :param email: Email account was created with
         :param password: Password account was created with
         :param tfa_secret: Base32 secret used for two-factor authentication (Only mandatory if account has 2fa enabled)
