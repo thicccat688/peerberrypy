@@ -18,8 +18,8 @@ class API:
     ):
         """
         Peerberry API wrapper with all relevant Peerberry functionalities.
-        :param email: Email account was created with
-        :param password: Password account was created with
+        :param email: Account's email
+        :param password: Account's password
         :param tfa_secret: Base32 secret used for two-factor authentication (Only mandatory if account has 2fa enabled)
         """
 
