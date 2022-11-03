@@ -176,10 +176,10 @@ class API:
         if min_available_amount is not None:
             loan_params['minRemainingAmount'] = min_available_amount
 
-        if group_guarantee is not None:
+        if group_guarantee:
             loan_params['groupGuarantee'] = 1
 
-        if exclude_invested_loans is not None:
+        if exclude_invested_loans:
             loan_params['hideInvested'] = 1
 
         # Add country filters to query parameters
