@@ -6,15 +6,10 @@ import pandas as pd
 import os
 
 
-email = os.getenv(key='PEERBERRY_EMAIL')
-password = os.getenv(key='PEERBERRY_PASSWORD')
-tfa_secret = os.getenv(key='PEERBERRY_TFA_SECRET')
-
-
 peerberry_client = API(
-    email=email,
-    password=password,
-    tfa_secret=tfa_secret,
+    email=os.getenv(key='PEERBERRY_EMAIL'),
+    password=os.getenv(key='PEERBERRY_PASSWORD'),
+    tfa_secret=os.getenv(key='PEERBERRY_TFA_SECRET'),
 )
 
 
@@ -126,7 +121,6 @@ def test_transactions():
         ),
         pd.DataFrame,
     )
-
 
 
 def test_logout():

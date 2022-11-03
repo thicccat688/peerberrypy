@@ -20,7 +20,8 @@ class API:
         Peerberry API wrapper with all relevant Peerberry functionalities.
         :param email: Account's email
         :param password: Account's password
-        :param tfa_secret: Base32 secret used for two-factor authentication (Only mandatory if account has 2fa enabled)
+        :param tfa_secret: Base32 secret used for two-factor authentication
+        (Only mandatory if account has two-factor authentication enabled)
         """
 
         self.email = email
@@ -349,6 +350,7 @@ class API:
             self,
             quantity: int = 100000000000,
             sort: str = 'invested_amount',
+            countries: list = None,
             ascending_sort: bool = False,
             current: bool = True,
             raw: bool = False,
@@ -359,6 +361,7 @@ class API:
         but has fewer filters available.
         :param quantity: Amount of investments to fetch (If quantity is not specified it will fetch all investments)
         :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
+        :param countries: Filter investments by country of origin (Gets investments from all countries by default)
         :param ascending_sort: Sort by ascending order (By default sorts in descending order)
         :param current: Fetch current investments or finished investments (Gets current investments by default)
         :param raw: Returns Excel bytes if True or pandas DataFrame if False (False by default)
@@ -375,6 +378,16 @@ class API:
             'type': 'CURRENT' if current else 'FINISHED',
             'lang': 'en',
         }
+
+        # Add country filters to query parameters
+        if countries:
+            for idx, country in enumerate(countries):
+                if country not in CONSTANTS.COUNTRIES_ID:
+                    raise ValueError(
+                        f'{country} isn\'t one of the available countries: {", ".join(CONSTANTS.COUNTRIES_ID)}.',
+                    )
+
+                investment_params[f'countryIds[{idx}]'] = CONSTANTS.COUNTRIES_ID[country]
 
         investments = self.__session.request(
             url=f'{ENDPOINTS.INVESTMENTS_URI}/export',
