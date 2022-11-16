@@ -63,6 +63,16 @@ def test_loan_details():
     )
 
 
+def test_loan_agreement():
+    assert isinstance(
+        peerberry_client.get_agreement(
+            loan_id=39125759,
+            lang='en',
+        ),
+        bytes,
+    )
+
+
 def test_investments():
     assert isinstance(
         peerberry_client.get_investments(

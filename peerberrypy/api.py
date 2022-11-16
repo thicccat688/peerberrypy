@@ -5,6 +5,7 @@ from peerberrypy.constants import CONSTANTS
 from datetime import date
 from typing import Union
 import pandas as pd
+import warnings
 import pyotp
 import math
 
@@ -27,6 +28,9 @@ class API:
         self.email = email
         self.__password = password
         self.__tfa_secret = tfa_secret
+
+        if self.__tfa_secret is None:
+            warnings.warn('Using two-factor authentication with your Peerberry account is highly recommended.')
 
         # Initialize HTTP session & authenticate to API
         self.__session = RequestHandler()
@@ -226,7 +230,7 @@ class API:
     ) -> dict:
         """
         :param loan_id: ID of loan to get details from
-        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :param raw: Returns python list of schedule_data if True or pandas DataFrame if False (False by default)
         :return: The borrower's data, the loan's data, and the repayment schedule
         """
 
@@ -237,10 +241,26 @@ class API:
         schedule_data = credit_data['schedule']['data']
 
         return {
-            'borrower_data': credit_data['borrower'],
-            'loan_data': credit_data['loan'],
+            'borrower_data': credit_data.get('borrower'),
+            'loan_data': credit_data.get('loan'),
+            'originator': credit_data.get('originator'),
+            'pledge': credit_data.get('pledge'),
             'schedule_data': schedule_data if raw else pd.DataFrame(schedule_data),
         }
+
+    def get_agreement(self, loan_id: int, lang: str = 'en') -> bytes:
+        """
+        :param loan_id: ID of investment to get agreement of
+        :param lang: Language to return agreement in (ISO code, by default "en" for english)
+        :return: Loan agreement bytes (Only available upon purchase)
+        """
+
+        agreement_bytes = self.__session.request(
+            url=f'{ENDPOINTS.INVESTMENTS_AGREEMENT_URI}/{loan_id}/agreement?lang={lang}',
+            output_type='bytes',
+        )
+
+        return agreement_bytes
 
     def purchase_loan(
             self,
