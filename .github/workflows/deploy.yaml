@@ -29,8 +29,8 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest
         env:
-          PEERBERRY_EMAIL: ${{ secrets.PEERBERRY_EMAIL }}
-          PEERBERRY_PASSWORD: ${{ secrets.PEERBERRY_PASSWORD }}
-          PEERBERRY_TFA_SECRET: ${{ secrets.PEERBERRY_TFA_SECRET }}
+          PEERBERRY_EMAIL: '${{ secrets.PEERBERRY_EMAIL }}'
+          PEERBERRY_PASSWORD: '${{ secrets.PEERBERRY_PASSWORD }}'
+          PEERBERRY_TFA_SECRET: '${{ secrets.PEERBERRY_TFA_SECRET }}'
         run: |
           pytest
