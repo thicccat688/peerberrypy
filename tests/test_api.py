@@ -31,7 +31,6 @@ def test_profit_overview():
             start_date=date(2022, 8, 21),
             end_date=date(2022, 9, 21),
             periodicity='day',
-            raw=False,
         ),
         pd.DataFrame,
     )
@@ -46,31 +45,17 @@ def test_loans():
         peerberry_client.get_loans(
             quantity=10,
             originators=['Smart Pozyczka PL'],
-            sort='loan_amount',
-            raw=False,
         ),
         pd.DataFrame,
     )
 
 
 def test_loan_details():
-    assert isinstance(
-        peerberry_client.get_loan_details(
-            loan_id=1,
-            raw=False,
-        ),
-        dict,
-    )
+    assert isinstance(peerberry_client.get_loan_details(loan_id=1), dict)
 
 
 def test_loan_agreement():
-    assert isinstance(
-        peerberry_client.get_agreement(
-            loan_id=39125759,
-            lang='en',
-        ),
-        bytes,
-    )
+    assert isinstance(peerberry_client.get_agreement(loan_id=39125759, lang='en'), bytes)
 
 
 def test_investments():
@@ -81,7 +66,6 @@ def test_investments():
             max_interest_rate=20,
             min_interest_rate=10,
             countries=['Kazakhstan', 'Lithuania'],
-            raw=False,
         ),
         pd.DataFrame,
     )
@@ -93,12 +77,11 @@ def test_investments():
             max_interest_rate=20,
             min_interest_rate=10,
             countries=['Kazakhstan', 'Lithuania'],
-            raw=False,
         ),
         pd.DataFrame,
     )
 
-    assert isinstance(peerberry_client.get_mass_investments(raw=False), pd.DataFrame)
+    assert isinstance(peerberry_client.get_mass_investments(), pd.DataFrame)
 
 
 def test_summary():
@@ -117,7 +100,6 @@ def test_transactions():
             quantity=1000,
             start_date=CONSTANTS.START_DATE,
             end_date=CONSTANTS.END_DATE,
-            raw=False,
         ),
         pd.DataFrame,
     )
@@ -127,7 +109,6 @@ def test_transactions():
             quantity=1000,
             start_date=CONSTANTS.START_DATE,
             end_date=CONSTANTS.END_DATE,
-            raw=False,
         ),
         pd.DataFrame,
     )
