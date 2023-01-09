@@ -125,8 +125,8 @@ class API:
             loan_types: list = None,
             sort: str = 'loan_amount',
             ascending_sort: bool = False,
-            group_guarantee: bool = True,
-            exclude_invested_loans: bool = True,
+            group_guarantee: bool = None,
+            exclude_invested_loans: bool = None,
             raw: bool = False,
     ) -> Union[pd.DataFrame, list]:
         """
@@ -180,11 +180,11 @@ class API:
         if min_available_amount is not None:
             loan_params['minRemainingAmount'] = min_available_amount
 
-        if group_guarantee:
-            loan_params['groupGuarantee'] = 1
+        if group_guarantee is not None:
+            loan_params['groupGuarantee'] = int(group_guarantee)
 
-        if exclude_invested_loans:
-            loan_params['hideInvested'] = 1
+        if exclude_invested_loans is not None:
+            loan_params['hideInvested'] = int(exclude_invested_loans)
 
         # Add country filters to query parameters
         if countries:
@@ -197,7 +197,7 @@ class API:
 
                 if isinstance(id_, list):
                     for sub_id, originator_id in enumerate(id_):
-                        loan_params[f'loanOriginators[{idx+sub_id}]'] = originator_id
+                        loan_params[f'loanOriginators[{idx + sub_id}]'] = originator_id
 
                     continue
 
@@ -211,12 +211,17 @@ class API:
         loans = []
 
         for _ in range(math.ceil(quantity / 40)):
+            print('test --->', loan_params)
+
             loans_data = self.__session.request(
                 url=ENDPOINTS.LOANS_URI,
                 params=loan_params,
             )['data']
 
-            # Extend current loan list with new loans
+            if len(loans_data) == 0:
+                break
+
+                # Extend current loan list with new loans
             loans.extend(loans_data)
 
             loan_params['offset'] += 40
