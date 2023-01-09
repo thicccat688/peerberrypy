@@ -189,11 +189,11 @@ class API:
         # Add country filters to query parameters
         if countries:
             for idx, country in enumerate(countries):
-                loan_params[f'countryIds[{idx}]'] = CONSTANTS.COUNTRIES_ID[country]
+                loan_params[f'countryIds[{idx}]'] = CONSTANTS.get_country_iso(country)
 
         if originators:
             for idx, originator in enumerate(originators):
-                id_ = CONSTANTS.get_originators()[originator]
+                id_ = CONSTANTS.get_originator(originator)
 
                 if isinstance(id_, list):
                     for sub_id, originator_id in enumerate(id_):
@@ -352,7 +352,7 @@ class API:
 
         if countries:
             for idx, country in enumerate(countries):
-                investment_params[f'countryIds[{idx}]'] = CONSTANTS.COUNTRIES_ID[country]
+                investment_params[f'countryIds[{idx}]'] = CONSTANTS.get_country_iso(country)
 
         # Add loan type filters to query parameters
         if loan_types:
@@ -402,12 +402,7 @@ class API:
         # Add country filters to query parameters
         if countries:
             for idx, country in enumerate(countries):
-                if country not in CONSTANTS.COUNTRIES_ID:
-                    raise ValueError(
-                        f'{country} isn\'t one of the available countries: {", ".join(CONSTANTS.COUNTRIES_ID)}.',
-                    )
-
-                investment_params[f'countryIds[{idx}]'] = CONSTANTS.COUNTRIES_ID[country]
+                investment_params[f'countryIds[{idx}]'] = CONSTANTS.get_country_iso(country)
 
         investments = self.__session.request(
             url=f'{ENDPOINTS.INVESTMENTS_URI}/export',

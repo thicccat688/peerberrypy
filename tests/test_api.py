@@ -45,7 +45,7 @@ def test_loans():
     assert isinstance(
         peerberry_client.get_loans(
             quantity=10,
-            originators=['Aventus Group'],
+            originators=['Smart Pozyczka PL'],
             sort='loan_amount',
             raw=False,
         ),

@@ -1,7 +1,12 @@
-from typing import Generator
+from peerberrypy.exceptions import PeerberryException
+from peerberrypy.endpoints import ENDPOINTS
+import requests
+import time
 
 
 class CONSTANTS:
+    GLOBALS, COUNTRIES_ISO, ORIGINATORS_ID = None, None, None
+
     PERIODICITIES = {'day', 'month', 'year'}
 
     TRANSACTION_PERIODICITIES = {'today', 'thisWeek', 'thisMonth'}
@@ -29,80 +34,6 @@ class CONSTANTS:
         'amount': 'Amount',
     }
 
-    COUNTRIES_ID = {
-        'Lithuania': 1,
-        'Poland': 2,
-        'Czech Republic': 63,
-        'Kazakhstan': 118,
-        'Kenya': 119,
-        'Moldova': 149,
-        'Philippines': 178,
-        'Romania': 185,
-        'Russian Federation': 186,
-        'Sri Lanka': 213,
-        'Ukraine': 236,
-        'Vietnam': 245,
-    }
-
-    ORIGINATORS_BRANDS = {
-        'Aventus Group',
-        'Gofingo Group',
-        'Lithome',
-        'SIB Group',
-        'Aventus Development',
-        'Litelektra',
-    }
-
-    ORIGINATORS_ID = {
-        'Aventus Group': {
-            'Smart Pozczka PL': 2,
-            'Pozyczka Plus PL': 3,
-            'Pozyczka Plus PL - personal loans': 8,
-            'Smart Pozczka PL - personal loans': 9,
-            'Auto-Money KZ': 12,
-            'Auto Money UA': 13,
-            'Slon Credit UA': 14,
-            'Credit plus UA': 15,
-            'Credit7 MD': 18,
-            'Belka Credit RU': 20,
-            'Credit7 UA': 21,
-            'Credit365 MD': 23,
-            'Senmo VN': 28,
-            'Credit Plus KZ': 30,
-            'Nano deneg RU': 31,
-            'Credit7 RU': 32,
-            'Cash X LK': 33,
-            'Credit365 KZ': 36,
-            'LLC Selfie credit': 37,
-            'Selfie credit LLC': 38,
-            'CashXpress PH': 39,
-            'Credit7 RO': 42,
-            'LendPlus': 43,
-            'Dong Plus VN': 44,
-        },
-        'Gofingo Group': {
-            'Sos Credit CZ': 4,
-            'Euro Groshi LLC': 6,
-            'Gofingo UA': 19,
-            'Euro Groshi UA': 22,
-            'Zecredit UA': 27,
-        },
-        'Lithome': {
-            'Lithome LT': 7,
-        },
-        'SIB Group': {
-            'Si Baltic LLC': 29,
-            'LLC Teratus': 34,
-            'LLC Pakrantės būstas': 35,
-        },
-        'Aventus Development': {
-            'Aldega LLC': 40,
-        },
-        'Litelektra': {
-            'Litelektra': 41,
-        }
-    }
-
     LOAN_SORT_TYPES = {
         'loan_id': 'loanId',
         'term': 'term',
@@ -126,16 +57,37 @@ class CONSTANTS:
     }
 
     @classmethod
-    def get_originators(cls) -> dict:
-        return {k: v for (k, v) in cls.get_values(cls.ORIGINATORS_ID)}
+    def get_globals(cls) -> dict:
+        if cls.GLOBALS is None:
+            response = requests.get(ENDPOINTS.GLOBALS_URI, params={'t': int(time.time())})
+
+            if response.status_code != 200:
+                raise PeerberryException('Failed to fetch globals.')
+
+            cls.GLOBALS = response.json()
+
+        return cls.GLOBALS
 
     @classmethod
-    def get_values(cls, __obj: dict) -> Generator:
-        for (k, v) in __obj.items():
-            if isinstance(v, dict):
-                yield k, list(__obj[k].values())
+    def get_country_iso(cls, country: str) -> int:
+        if cls.COUNTRIES_ISO is None:
+            cls.COUNTRIES_ISO = dict(map(lambda cnt: (cnt['title'], cnt['id']), cls.get_globals()['countries']))
 
-                yield from cls.get_values(v)
+        if country not in cls.COUNTRIES_ISO:
+            raise ValueError(
+                f'{country} must be one of the following countries: {", ".join(cls.COUNTRIES_ISO)}.',
+            )
 
-            else:
-                yield k, v
+        return cls.COUNTRIES_ISO[country]
+
+    @classmethod
+    def get_originator(cls, originator: str) -> int:
+        if cls.ORIGINATORS_ID is None:
+            cls.ORIGINATORS_ID = dict(map(lambda org: (org['title'], org['id']), cls.get_globals()['originators']))
+
+        if originator not in cls.ORIGINATORS_ID:
+            raise ValueError(
+                f'{originator} must be one of the following originators: {", ".join(cls.ORIGINATORS_ID)}.',
+            )
+
+        return cls.ORIGINATORS_ID[originator]
