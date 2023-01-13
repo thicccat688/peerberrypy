@@ -2,8 +2,9 @@ from peerberrypy.endpoints import ENDPOINTS
 from peerberrypy.request_handler import RequestHandler
 from peerberrypy.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, InvalidType
 from peerberrypy.constants import CONSTANTS
-from datetime import date
+from peerberrypy.utils import Utils
 from typing import Union
+from datetime import date
 import pandas as pd
 import warnings
 import pyotp
@@ -41,9 +42,7 @@ class API:
         :return: Basic information, accounts & balance information
         """
 
-        return self.__session.request(
-            url=ENDPOINTS.PROFILE_URI,
-        )
+        return Utils.parse_peerberry_items(self.__session.request(url=ENDPOINTS.PROFILE_URI))
 
     def get_loyalty_tier(self) -> dict:
         """
@@ -58,10 +57,10 @@ class API:
         unlocked_tiers = list(filter(lambda obj: obj['locked'] is False, response['items']))
 
         # Get the highest unlocked tier
-        top_available_tier = unlocked_tiers[-1]
+        top_available_tier = unlocked_tiers[-1] if len(unlocked_tiers) > 0 else None
 
         return {
-            'tier': top_available_tier['title'].rstrip(),
+            'tier': top_available_tier['title'].rstrip() if top_available_tier else None,
             'extra_return': f'{top_available_tier["percent"]}%',
             'max_amount': top_available_tier['maxAmount'],
             'min_amount': top_available_tier['minAmount'],
@@ -72,8 +71,10 @@ class API:
         :return: Available balance, total invested, total profit, current investments, net annual return, etc.
         """
 
-        return self.__session.request(
-            url=ENDPOINTS.OVERVIEW_URI,
+        return Utils.parse_peerberry_items(
+            self.__session.request(
+                url=ENDPOINTS.OVERVIEW_URI,
+            )
         )
 
     def get_profit_overview(
@@ -107,9 +108,7 @@ class API:
         :return: Percentage of funds in current loans and late loans (In 1-15, 16-30, and 31-60 day intervals)
         """
 
-        return self.__session.request(
-            url=ENDPOINTS.INVESTMENTS_STATUS_URI,
-        )
+        return Utils.parse_peerberry_items(self.__session.request(url=ENDPOINTS.INVESTMENTS_STATUS_URI))
 
     def get_loans(
             self,
