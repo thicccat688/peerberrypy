@@ -29,7 +29,7 @@ pip install peerberrypy
 from peerberrypy import API
 
 
-# Authenticate to the API client (You won't need to manually authenticate again after this)
+# Authenticate to the API client
 api_client = API(
   email='YOUR EMAIL HERE',
   password='YOUR PASSWORD HERE',
