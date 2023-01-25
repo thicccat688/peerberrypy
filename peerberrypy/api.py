@@ -324,10 +324,16 @@ class API:
         if quantity <= 0:
             raise ValueError('You need to fetch at least 1 investment.')
 
-        if sort not in CONSTANTS.LOAN_SORT_TYPES:
-            raise InvalidSort(f'Loans can only be sorted by: {", ".join(CONSTANTS.LOAN_SORT_TYPES)}')
+        sort_types = CONSTANTS.CURRENT_INVESTMENT_SORT_TYPES if current else CONSTANTS.FINISHED_INVESTMENT_SORT_TYPES
 
-        sort = CONSTANTS.LOAN_SORT_TYPES[sort]
+        if sort not in CONSTANTS.LOAN_SORT_TYPES:
+            raise InvalidSort(f'Loans can only be sorted by: {", ".join(sort_types)}')
+
+        if current:
+            sort = sort_types[sort]
+
+        else:
+            sort = sort_types[sort]
 
         investment_params = {
             'sort': sort if ascending_sort else f'-{sort}',

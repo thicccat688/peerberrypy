@@ -42,6 +42,21 @@ class CONSTANTS:
         'loan_amount': 'availableToInvest',
     }
 
+    CURRENT_INVESTMENT_SORT_TYPES = {
+        'purchase_date': 'dateOfPurchcase',
+        'interest_rate': 'interestRate',
+        'loan_amount': 'amount',
+        'estimated_final_payment_date': 'estimatedFinalPaymentDate',
+    }
+
+    FINISHED_INVESTMENT_SORT_TYPES = {
+        'final_payment_date': 'finishedAt',
+        'purchase_date': 'dateOfPurchcase',
+        'interest_rate': 'interestRate',
+        'loan_amount': 'amount',
+        'estimated_final_payment_date': 'estimatedFinalPaymentDate',
+    }
+
     LOAN_EXPORT_SORT_TYPES = {
         'date_of_purchase': 'Date of purchase',
         'interest_rate': 'Interest rate',
