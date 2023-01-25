@@ -649,3 +649,11 @@ class API:
         self.__session.remove_header('Authorization')
 
         return 'Successfully logged out.'
+
+    @staticmethod
+    def get_countries() -> dict:
+        return CONSTANTS.get_countries()
+
+    @staticmethod
+    def get_originators() -> dict:
+        return CONSTANTS.get_originators()

@@ -114,5 +114,13 @@ def test_transactions():
     )
 
 
+def test_countries():
+    assert isinstance(peerberry_client.get_countries(), dict)
+
+
+def test_originators():
+    assert isinstance(peerberry_client.get_originators(), dict)
+
+
 def test_logout():
     assert isinstance(peerberry_client.logout(), str)
