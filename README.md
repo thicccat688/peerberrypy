@@ -43,7 +43,7 @@ print(api_client.get_profile())
 print(api_client.get_loans(quantity=100, originators=['Smart Pozyczka PL']))
 
 # Gets 100 of your current investments from Kazakhstan and Lithuania
-print(peerberry_client.get_investments(quantity=100, current=True, countries=['Kazakhstan', 'Lithuania'])
+print(api_client.get_investments(quantity=100, current=True, countries=['Kazakhstan', 'Lithuania'])
 ```
 
 ## API functions
