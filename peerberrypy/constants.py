@@ -87,7 +87,10 @@ class CONSTANTS:
     def get_countries(cls) -> dict:
         if cls.COUNTRIES_ISO is None:
             cls.COUNTRIES_ISO = dict(
-                map(lambda cnt: (cnt['title'].strip(), cnt['id']), cls.get_globals()['countries'])
+                map(
+                    lambda cnt: (cnt['title'].strip(), {k: v for k, v in cnt.items() if k != 'title'}),
+                    cls.get_globals()['countries'],
+                )
             )
 
         return cls.COUNTRIES_ISO
@@ -117,7 +120,7 @@ class CONSTANTS:
                 f'{country} must be one of the following countries: {", ".join(cls.COUNTRIES_ISO)}.',
             )
 
-        return cls.COUNTRIES_ISO[country]
+        return cls.COUNTRIES_ISO[country].get('id')
 
     @classmethod
     def get_originator(cls, originator: str) -> int:
