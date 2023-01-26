@@ -96,7 +96,13 @@ class CONSTANTS:
     def get_originators(cls) -> dict:
         if cls.ORIGINATORS_ID is None:
             cls.ORIGINATORS_ID = dict(
-                map(lambda org: (org['title'].strip(), org['id']), cls.get_globals()['originators'])
+                map(
+                    lambda org: (
+                        org['title'].strip(),
+                        {k: v for k, v in org.items() if k != 'title'},
+                    ),
+                    cls.get_globals()['originators']
+                )
             )
 
         return cls.ORIGINATORS_ID
@@ -104,7 +110,7 @@ class CONSTANTS:
     @classmethod
     def get_country_iso(cls, country: str) -> int:
         if cls.COUNTRIES_ISO is None:
-            cls.COUNTRIES_ISO = cls.get_countries()
+            cls.get_countries()
 
         if country not in cls.COUNTRIES_ISO:
             raise ValueError(
@@ -116,11 +122,11 @@ class CONSTANTS:
     @classmethod
     def get_originator(cls, originator: str) -> int:
         if cls.ORIGINATORS_ID is None:
-            cls.ORIGINATORS_ID = cls.get_originators()
+            cls.get_originators()
 
         if originator not in cls.ORIGINATORS_ID:
             raise ValueError(
                 f'{originator} must be one of the following originators: {", ".join(cls.ORIGINATORS_ID)}.',
             )
 
-        return cls.ORIGINATORS_ID[originator]
+        return cls.ORIGINATORS_ID[originator].get('id')
