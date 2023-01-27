@@ -17,24 +17,28 @@ class API:
             email: str,
             password: str,
             tfa_secret: str = None,
+            access_token: str = None,
     ):
         """
         Peerberry API wrapper with all relevant Peerberry functionalities.
         :param email: Account's email
         :param password: Account's password
         :param tfa_secret: Base32 secret used for two-factor authentication
+        :param access_token: Access token used to authenticate to the API (Optional)
         (Only mandatory if account has two-factor authentication enabled)
         """
 
         self.email = email
-        self.__password = password
-        self.__tfa_secret = tfa_secret
+        self._password = password
+        self._tfa_secret = tfa_secret
 
-        if self.__tfa_secret is None:
+        if self._tfa_secret is None:
             warnings.warn('Using two-factor authentication with your Peerberry account is highly recommended.')
 
         # Initialize HTTP session & authenticate to API
-        self.__session = RequestHandler()
+        self._session = RequestHandler()
+        self.access_token = access_token
+
         self.login()
 
     def get_profile(self) -> dict:
@@ -42,14 +46,14 @@ class API:
         :return: Basic information, accounts & balance information
         """
 
-        return Utils.parse_peerberry_items(self.__session.request(url=ENDPOINTS.PROFILE_URI))
+        return Utils.parse_peerberry_items(self._session.request(url=ENDPOINTS.PROFILE_URI))
 
     def get_loyalty_tier(self) -> dict:
         """
         :return: Tier, extra return in percentage, the max amount and the minimum amount to be in the tier
         """
 
-        response = self.__session.request(
+        response = self._session.request(
             url=ENDPOINTS.LOYALTY_URI,
         )
 
@@ -72,7 +76,7 @@ class API:
         """
 
         return Utils.parse_peerberry_items(
-            self.__session.request(
+            self._session.request(
                 url=ENDPOINTS.OVERVIEW_URI,
             )
         )
@@ -97,7 +101,7 @@ class API:
         if periodicity not in periodicities:
             raise InvalidPeriodicity(f'Periodicity must be one of the following: {", ".join(periodicities)}')
 
-        profit_overview = self.__session.request(
+        profit_overview = self._session.request(
             url=f'{ENDPOINTS.PROFIT_OVERVIEW_URI}/{start_date}/{end_date}/{periodicity}',
         )
 
@@ -108,7 +112,7 @@ class API:
         :return: Percentage of funds in current loans and late loans (In 1-15, 16-30, and 31-60 day intervals)
         """
 
-        return Utils.parse_peerberry_items(self.__session.request(url=ENDPOINTS.INVESTMENTS_STATUS_URI))
+        return Utils.parse_peerberry_items(self._session.request(url=ENDPOINTS.INVESTMENTS_STATUS_URI))
 
     def get_loans(
             self,
@@ -210,9 +214,7 @@ class API:
         loans = []
 
         for _ in range(math.ceil(quantity / 40)):
-            print('test --->', loan_params)
-
-            loans_data = self.__session.request(
+            loans_data = self._session.request(
                 url=ENDPOINTS.LOANS_URI,
                 params=loan_params,
             )['data']
@@ -238,7 +240,7 @@ class API:
         :return: The borrower's data, the loan's data, and the repayment schedule
         """
 
-        credit_data = self.__session.request(
+        credit_data = self._session.request(
             url=f'{ENDPOINTS.LOANS_URI}/{loan_id}',
         )
 
@@ -259,7 +261,7 @@ class API:
         :return: Loan agreement bytes (Only available upon purchase)
         """
 
-        agreement_bytes = self.__session.request(
+        agreement_bytes = self._session.request(
             url=f'{ENDPOINTS.INVESTMENTS_AGREEMENT_URI}/{loan_id}/agreement?lang={lang}',
             output_type='bytes',
         )
@@ -277,7 +279,7 @@ class API:
         :return: Success message upon purchasing loan
         """
 
-        self.__session.request(
+        self._session.request(
             url=f'{ENDPOINTS.LOANS_URI}/{loan_id}',
             method='POST',
             data={'amount': str(amount)},
@@ -369,7 +371,7 @@ class API:
             for idx, type_ in enumerate(loan_types):
                 investment_params[f'loanTermId[{idx}]'] = CONSTANTS.LOAN_SORT_TYPES[type_]
 
-        investments_data = self.__session.request(
+        investments_data = self._session.request(
             url=ENDPOINTS.INVESTMENTS_URI,
             params=investment_params,
         )['data']
@@ -414,7 +416,7 @@ class API:
             for idx, country in enumerate(countries):
                 investment_params[f'countryIds[{idx}]'] = CONSTANTS.get_country_iso(country)
 
-        investments = self.__session.request(
+        investments = self._session.request(
             url=f'{ENDPOINTS.INVESTMENTS_URI}/export',
             params=investment_params,
             output_type='bytes',
@@ -445,7 +447,7 @@ class API:
             'endDate': end_date,
         }
 
-        summary_data = self.__session.request(
+        summary_data = self._session.request(
             url=ENDPOINTS.ACCOUNT_SUMMARY_URI,
             params=account_params,
         )
@@ -515,7 +517,7 @@ class API:
 
             transactions_params['periodicity'] = periodicity
 
-        transactions_data = self.__session.request(
+        transactions_data = self._session.request(
             url=ENDPOINTS.CASH_FLOW_URI,
             params=transactions_params,
         )
@@ -579,7 +581,7 @@ class API:
 
             transactions_params['periodicity'] = periodicity
 
-        transactions_data = self.__session.request(
+        transactions_data = self._session.request(
             url=f'{ENDPOINTS.CASH_FLOW_URI}/import',
             params=transactions_params,
             output_type='bytes',
@@ -597,12 +599,17 @@ class API:
         :return: Access token to authenticate to Peerberry API
         """
 
+        if self.access_token:
+            self._session.add_header({'Authorization': f'Bearer {self.access_token}'})
+
+            return f'Bearer {self.access_token}'
+
         login_data = {
             'email': self.email,
-            'password': self.__password,
+            'password': self._password,
         }
 
-        login_response = self.__session.request(
+        login_response = self._session.request(
             url=ENDPOINTS.LOGIN_URI,
             method='POST',
             data=login_data,
@@ -611,42 +618,44 @@ class API:
 
         tfa_response_token = login_response.get('tfa_token')
 
-        if self.__tfa_secret is None:
-            access_token = login_response.get('access_token')
+        if self._tfa_secret is None:
+            self.access_token = login_response.get('access_token')
 
-            self.__session.add_header({'Authorization': f'Bearer {access_token}'})
+            self._session.add_header({'Authorization': f'Bearer {self.access_token}'})
 
-            return f'Bearer {access_token}'
+            return f'Bearer {self.access_token}'
 
         totp_data = {
-            'code': pyotp.TOTP(self.__tfa_secret).now(),
+            'code': pyotp.TOTP(self._tfa_secret).now(),
             'tfa_token': tfa_response_token,
         }
 
-        totp_response = self.__session.request(
+        totp_response = self._session.request(
             url=ENDPOINTS.TFA_URI,
             method='POST',
             data=totp_data,
         )
 
-        access_token = totp_response.get('access_token')
+        self.access_token = totp_response.get('access_token')
 
-        self.__session.add_header({'Authorization': f'Bearer {access_token}'})
+        self._session.add_header({'Authorization': f'Bearer {self.access_token}'})
 
         # Set authorization header with JWT bearer token
-        return f'Bearer {access_token}'
+        return f'Bearer {self.access_token}'
 
     def logout(self) -> str:
         """
         :return: Success message upon logging out.
         """
 
-        self.__session.request(
+        self._session.request(
             url=ENDPOINTS.LOGOUT_URI,
         )
 
         # Remove revoked authorization header
-        self.__session.remove_header('Authorization')
+        self._session.remove_header('Authorization')
+
+        self.access_token = None
 
         return 'Successfully logged out.'
 
