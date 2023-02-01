@@ -1,6 +1,6 @@
 from peerberrypy.exceptions import PeerberryException
 from peerberrypy.endpoints import ENDPOINTS
-import requests
+import cloudscraper
 import time
 
 
@@ -70,11 +70,19 @@ class CONSTANTS:
         'remaining_principal': 'Remaining principal',
         'status': 'Status',
     }
+    
+    _session = cloudscraper.create_scraper(
+        browser={
+            'browser': 'chrome',
+            'platform': 'windows',
+            'desktop': True,
+        }
+    )
 
     @classmethod
     def get_globals(cls) -> dict:
         if cls.GLOBALS is None:
-            response = requests.get(ENDPOINTS.GLOBALS_URI, params={'t': int(time.time())})
+            response = cls._session.get(ENDPOINTS.GLOBALS_URI, params={'t': int(time.time())})
 
             if response.status_code != 200:
                 raise PeerberryException('Failed to fetch globals.')

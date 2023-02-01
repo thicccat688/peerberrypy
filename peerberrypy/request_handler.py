@@ -1,13 +1,19 @@
 from peerberrypy.exceptions import PeerberryException
 from peerberrypy.constants import CONSTANTS
 from typing import Type
-import requests
+import cloudscraper
 
 
 class RequestHandler:
     def __init__(self):
         """ Request handler for internal use with Peerberry's specifications. """
-        self.__session = requests.Session()
+        self.__session = cloudscraper.create_scraper(
+            browser={
+                'browser': 'chrome',
+                'platform': 'windows',
+                'desktop': True,
+            }
+        )
 
     def request(
             self,
