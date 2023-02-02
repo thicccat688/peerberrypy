@@ -191,6 +191,12 @@ class API:
 
         # Add country filters to query parameters
         if countries:
+            if not isinstance(countries, list):
+                raise TypeError(
+                    f'Countries argument must be a list of countries. '
+                    f'Available countries: {list(CONSTANTS.get_countries())}'
+                )
+
             for idx, country in enumerate(countries):
                 loan_params[f'countryIds[{idx}]'] = CONSTANTS.get_country_iso(country)
 
@@ -206,10 +212,16 @@ class API:
 
                 loan_params[f'loanOriginators[{idx}]'] = id_
 
-        # Add loan type filters to query parameters
-        if loan_types:
-            for idx, type_ in enumerate(loan_types):
-                loan_params[f'loanTermId[{idx}]'] = CONSTANTS.LOAN_SORT_TYPES[type_]
+            # Add loan type filters to query parameters
+            if loan_types:
+                if not isinstance(loan_types, list):
+                    raise TypeError(
+                        f'loan_types arguments must be a list of loan types. '
+                        f'Available loan types: {list(CONSTANTS.LOAN_TYPES_ID)}'
+                    )
+
+                for idx, type_ in enumerate(loan_types):
+                    loan_params[f'loanTermId[{idx}]'] = CONSTANTS.get_loan_type(type_)
 
         loans = []
 
@@ -363,13 +375,25 @@ class API:
             investment_params['minAmount'] = min_invested_amount
 
         if countries:
+            if not isinstance(countries, list):
+                raise TypeError(
+                    f'Countries argument must be a list of countries. '
+                    f'Available countries: {list(CONSTANTS.get_countries())}'
+                )
+
             for idx, country in enumerate(countries):
                 investment_params[f'countryIds[{idx}]'] = CONSTANTS.get_country_iso(country)
 
         # Add loan type filters to query parameters
         if loan_types:
+            if not isinstance(loan_types, list):
+                raise TypeError(
+                    f'loan_types arguments must be a list of loan types. '
+                    f'Available loan types: {list(CONSTANTS.LOAN_TYPES_ID)}'
+                )
+
             for idx, type_ in enumerate(loan_types):
-                investment_params[f'loanTermId[{idx}]'] = CONSTANTS.LOAN_SORT_TYPES[type_]
+                investment_params[f'loanTermId[{idx}]'] = CONSTANTS.get_loan_type(type_)
 
         investments_data = self._session.request(
             url=ENDPOINTS.INVESTMENTS_URI,
@@ -413,6 +437,12 @@ class API:
 
         # Add country filters to query parameters
         if countries:
+            if not isinstance(countries, list):
+                raise TypeError(
+                    f'Countries argument must be a list of countries. '
+                    f'Available countries: {list(CONSTANTS.get_countries())}'
+                )
+
             for idx, country in enumerate(countries):
                 investment_params[f'countryIds[{idx}]'] = CONSTANTS.get_country_iso(country)
 

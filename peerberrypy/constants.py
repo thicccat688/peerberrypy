@@ -141,3 +141,10 @@ class CONSTANTS:
             )
 
         return cls.ORIGINATORS_ID[originator].get('id')
+
+    @classmethod
+    def get_loan_type(cls, type_: str) -> int:
+        if type_ not in cls.LOAN_TYPES_ID:
+            raise ValueError(f'{type_} must be one of the following types: {", ".join(cls.LOAN_TYPES_ID)}')
+
+        return cls.LOAN_TYPES_ID[type_]
