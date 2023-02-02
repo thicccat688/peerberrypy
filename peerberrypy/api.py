@@ -212,16 +212,16 @@ class API:
 
                 loan_params[f'loanOriginators[{idx}]'] = id_
 
-            # Add loan type filters to query parameters
-            if loan_types:
-                if not isinstance(loan_types, list):
-                    raise TypeError(
-                        f'loan_types arguments must be a list of loan types. '
-                        f'Available loan types: {list(CONSTANTS.LOAN_TYPES_ID)}'
-                    )
+        # Add loan type filters to query parameters
+        if loan_types:
+            if not isinstance(loan_types, list):
+                raise TypeError(
+                    f'loan_types arguments must be a list of loan types. '
+                    f'Available loan types: {list(CONSTANTS.LOAN_TYPES_ID)}'
+                )
 
-                for idx, type_ in enumerate(loan_types):
-                    loan_params[f'loanTermId[{idx}]'] = CONSTANTS.get_loan_type(type_)
+            for idx, type_ in enumerate(loan_types):
+                loan_params[f'loanTermId[{idx}]'] = CONSTANTS.get_loan_type(type_)
 
         loans = []
 
