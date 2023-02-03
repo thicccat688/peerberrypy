@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='peerberrypy',
-    version='1.5.0',
+    version='1.5.1',
     license='MIT',
     author='Tomás Perestrelo',
     author_email='tomasperestrelo21@gmail.com',

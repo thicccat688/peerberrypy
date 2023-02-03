@@ -43,7 +43,7 @@ class API:
             if self._password is None:
                 raise ValueError('Invalid password.')
 
-            if self._tfa_secret:
+            if not self._tfa_secret:
                 warnings.warn('Using two-factor authentication with your Peerberry account is highly recommended.')
 
         self.login()
