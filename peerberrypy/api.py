@@ -1,6 +1,7 @@
 from peerberrypy.endpoints import ENDPOINTS
 from peerberrypy.request_handler import RequestHandler
-from peerberrypy.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, InvalidType
+from peerberrypy.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, InvalidType, \
+    PeerberryException
 from peerberrypy.constants import CONSTANTS
 from peerberrypy.utils import Utils
 from typing import Union
@@ -24,7 +25,7 @@ class API:
         :param email: Account's email
         :param password: Account's password
         :param tfa_secret: Base32 secret used for two-factor authentication
-        :param access_token: Access token used to authenticate to the API (Only pass the JWT for it to work!)
+        :param access_token: Access token used to authenticate to the API (Optional; Only pass the JWT for it to work!)
         (Only mandatory if account has two-factor authentication enabled)
         """
 
@@ -637,6 +638,12 @@ class API:
         """
 
         if self.access_token:
+            try:
+                self.get_overview()
+
+            except PeerberryException:
+                raise PeerberryException('Invalid access token.')
+
             self._session.add_header({'Authorization': f'Bearer {self.access_token}'})
 
             return f'Bearer {self.access_token}'
