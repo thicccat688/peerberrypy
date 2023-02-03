@@ -14,8 +14,8 @@ import math
 class API:
     def __init__(
             self,
-            email: str,
-            password: str,
+            email: str = None,
+            password: str = None,
             tfa_secret: str = None,
             access_token: str = None,
     ):
@@ -24,7 +24,7 @@ class API:
         :param email: Account's email
         :param password: Account's password
         :param tfa_secret: Base32 secret used for two-factor authentication
-        :param access_token: Access token used to authenticate to the API (Optional)
+        :param access_token: Access token used to authenticate to the API (Only pass the JWT for it to work!)
         (Only mandatory if account has two-factor authentication enabled)
         """
 
@@ -32,12 +32,19 @@ class API:
         self._password = password
         self._tfa_secret = tfa_secret
 
-        if self._tfa_secret is None:
-            warnings.warn('Using two-factor authentication with your Peerberry account is highly recommended.')
-
         # Initialize HTTP session & authenticate to API
         self._session = RequestHandler()
         self.access_token = access_token
+
+        if not access_token:
+            if self.email is None:
+                raise ValueError('Invalid email.')
+
+            if self._password is None:
+                raise ValueError('Invalid password.')
+
+            if self._tfa_secret:
+                warnings.warn('Using two-factor authentication with your Peerberry account is highly recommended.')
 
         self.login()
 
