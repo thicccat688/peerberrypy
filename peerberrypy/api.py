@@ -638,13 +638,13 @@ class API:
         """
 
         if self.access_token:
+            self._session.add_header({'Authorization': f'Bearer {self.access_token}'})
+
             try:
                 self.get_overview()
 
             except PeerberryException:
                 raise PeerberryException('Invalid access token.')
-
-            self._session.add_header({'Authorization': f'Bearer {self.access_token}'})
 
             return f'Bearer {self.access_token}'
 
