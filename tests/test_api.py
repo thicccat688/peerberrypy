@@ -43,8 +43,8 @@ def test_investment_status():
 def test_loans():
     assert isinstance(
         peerberry_client.get_loans(
-            quantity=10,
-            originators=['Smart Pozyczka PL'],
+            quantity=100,
+            sort='loan_amount',
         ),
         pd.DataFrame,
     )

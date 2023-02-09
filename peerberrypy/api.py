@@ -1,7 +1,7 @@
 from peerberrypy.endpoints import ENDPOINTS
 from peerberrypy.request_handler import RequestHandler
-from peerberrypy.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, InvalidType, \
-    PeerberryException
+from peerberrypy.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, \
+    InvalidType, PeerberryException
 from peerberrypy.constants import CONSTANTS
 from peerberrypy.utils import Utils
 from typing import Union
@@ -125,6 +125,7 @@ class API:
     def get_loans(
             self,
             quantity: int,
+            start_page: int = 1,
             max_remaining_term: int = None,
             min_remaining_term: int = None,
             max_interest_rate: float = None,
@@ -142,6 +143,7 @@ class API:
     ) -> Union[pd.DataFrame, list]:
         """
         :param quantity: Amount of loans to fetch
+        :param start_page: Number of start page to start getting loans from
         :param max_remaining_term: Set maximum remaining term to fetch loan
         :param min_remaining_term: Set minimum remaining term to fetch loan
         :param max_interest_rate: Set maximum interest rate to fetch loan
@@ -167,10 +169,12 @@ class API:
 
         sort = CONSTANTS.LOAN_SORT_TYPES[sort]
 
+        page_size = 40 if quantity > 40 else quantity
+
         loan_params = {
             'sort': sort if ascending_sort else f'-{sort}',
-            'pageSize': 40 if quantity > 40 else quantity,
-            'offset': 0,
+            'pageSize': page_size,
+            'offset': math.ceil(page_size * (start_page - 1)),
         }
 
         if max_remaining_term is not None:
@@ -242,7 +246,7 @@ class API:
             if len(loans_data) == 0:
                 break
 
-                # Extend current loan list with new loans
+            # Extend current loan list with new loans
             loans.extend(loans_data)
 
             loan_params['offset'] += 40
@@ -311,6 +315,7 @@ class API:
     def get_investments(
             self,
             quantity: int,
+            start_page: int = 1,
             max_date_of_purchase: int = None,
             min_date_of_purchase: int = None,
             max_interest_rate: float = None,
@@ -328,6 +333,7 @@ class API:
         If you're going to fetch more than ~350 investments it's recommended to use the get_mass_investments function.
         It provides more details about the investments, but has fewer filters available.
         :param quantity: Amount of investments to fetch
+        :param start_page: Number of start page to start getting loans from
         :param max_date_of_purchase: Set maximum date of purchase to fetch loan
         :param min_date_of_purchase: Set minimum date of purchase to fetch loan
         :param max_interest_rate: Set maximum interest rate to fetch loan
@@ -361,7 +367,7 @@ class API:
             'sort': sort if ascending_sort else f'-{sort}',
             'pageSize': quantity,
             'type': 'CURRENT' if current else 'FINISHED',
-            'offset': 0,
+            'offset': math.ceil(quantity * (start_page - 1)),
         }
 
         if max_date_of_purchase is not None:
@@ -510,6 +516,7 @@ class API:
     def get_transactions(
             self,
             quantity: int,
+            start_page: int,
             start_date: date,
             end_date: date,
             periodicity: str = None,
@@ -521,6 +528,7 @@ class API:
         The get_transactions function should be used for any other use case since it is much faster.
         It provides more details about the transactions, but has fewer filters available and is slower.
         :param quantity: Amount of investments to fetch (If quantity is not specified it will fetch all investments)
+        :param start_page Number of start page to start getting loans from
         :param start_date: Start date of transaction data
         :param end_date: End date of transaction data
         :param periodicity: Specific periodicity filter (today, this week, and this month)
@@ -533,7 +541,7 @@ class API:
             'pageSize': quantity,
             'startDate': start_date,
             'endDate': end_date,
-            'offset': 0,
+            'offset': math.ceil(quantity * (start_page - 1)),
         }
 
         if transaction_types is not None:
