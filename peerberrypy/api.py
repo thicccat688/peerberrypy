@@ -1,4 +1,5 @@
 import decimal
+import functools
 
 from peerberrypy.endpoints import ENDPOINTS
 from peerberrypy.request_handler import RequestHandler
@@ -142,16 +143,16 @@ class API:
             group_guarantee: bool = None,
             exclude_invested_loans: bool = None,
             raw: bool = False,
-    ) -> Union[pd.DataFrame, list]:
+    ) -> Union[pd.DataFrame, List[dict]]:
         """
         :param quantity: Amount of loans to fetch
         :param start_page: Number of start page to start getting loans from
-        :param max_remaining_term: Set maximum remaining term to fetch loan
-        :param min_remaining_term: Set minimum remaining term to fetch loan
-        :param max_interest_rate: Set maximum interest rate to fetch loan
-        :param min_interest_rate: Set minimum interest rate to fetch loan
-        :param max_available_amount: Set maximum available investment amount to fetch loan
-        :param min_available_amount: Set minimum available investment amount to fetch loan
+        :param max_remaining_term: Maximum remaining term to fetch loan
+        :param min_remaining_term: Minimum remaining term to fetch loan
+        :param max_interest_rate: Maximum interest rate to fetch loan
+        :param min_interest_rate: Minimum interest rate to fetch loan
+        :param max_available_amount: Maximum available investment amount to fetch loan
+        :param min_available_amount: Minimum available investment amount to fetch loan
         :param countries: Filter loans by country of origin (Gets loans from all countries by default)
         :param originators: Filter loans by originator (Gets loans from all originators by default)
         :param loan_types: Filter loans by type (Short-term, long-term, real estate, leasing, and business)
@@ -162,21 +163,86 @@ class API:
         :param raw: Returns python list if True or pandas DataFrame if False (False by default)
         :return: All available loans for investment according to specified parameters
         """
+        argv = locals()
+        if quantity <= 0:
+            raise ValueError('You need to fetch at least 1 loan.')
+
+        page_size = min(CONSTANTS.MAX_LOAN_PAGE_SIZE, quantity)
+
+        argv.pop('quantity', None)
+        argv.pop('start_page', None)
+        do_get_loans_page = functools.partial(self.get_loans_page, **argv)
+
+        loans = []
+
+        max_page_size = CONSTANTS.MAX_LOAN_PAGE_SIZE
+        total_pages = math.ceil(quantity / max_page_size)
+
+        for page_num in range(total_pages):
+            remaining_items = quantity - (page_num * max_page_size)
+            page_size = min(remaining_items, max_page_size)
+            loans_data = do_get_loans_page(page_num)['data']
+
+            if len(loans_data) == 0:
+                break
+
+            # Extend current loan list with new loans
+            loans.extend(loans_data)
+
+        return loans if raw else pd.DataFrame(loans)
+
+    def get_loans_page(
+            self,
+            page_num: int,
+            quantity: int = CONSTANTS.MAX_LOAN_PAGE_SIZE,
+            max_remaining_term: Optional[int] = None,
+            min_remaining_term: Optional[int] = None,
+            max_interest_rate: Optional[decimal.Decimal] = None,
+            min_interest_rate: Optional[decimal.Decimal] = None,
+            max_available_amount: Optional[decimal.Decimal] = None,
+            min_available_amount: Optional[decimal.Decimal] = None,
+            countries: Optional[List[str]] = None,
+            originators: Optional[List[str]] = None,
+            loan_types: Optional[List[str]] = None,
+            sort: str = 'loan_id',
+            ascending_sort: bool = False,
+            group_guarantee: Optional[bool] = None,
+            exclude_invested_loans: Optional[bool] = None,
+    ) -> dict:
+        """
+        :param page_num: Number of start page to start getting loans from
+        :param quantity: Number of loans to fetch
+        :param max_remaining_term: Maximum remaining term to fetch loan
+        :param min_remaining_term: Minimum remaining term to fetch loan
+        :param max_interest_rate: Maximum interest rate to fetch loan
+        :param min_interest_rate: Minimum interest rate to fetch loan
+        :param max_available_amount: Maximum available investment amount to fetch loan
+        :param min_available_amount: Minimum available investment amount to fetch loan
+        :param countries: Filter loans by country of origin (Gets loans from all countries by default)
+        :param originators: Filter loans by originator (Gets loans from all originators by default)
+        :param loan_types: Filter loans by type (Short-term, long-term, real estate, leasing, and business)
+        :param sort: Sort by loan attributes (By amount available for investment, interest rate, term, etc.)
+        :param ascending_sort: Sort by ascending order (By default sorts in descending order)
+        :param group_guarantee: Restrict loans to only those with a group guarantee
+        :param exclude_invested_loans: Exclude loans that have been invested in previously
+        :return: A single page of available loans for investment according to specified parameters
+        """
 
         if quantity <= 0:
             raise ValueError('You need to fetch at least 1 loan.')
+
+        if quantity > CONSTANTS.MAX_LOAN_PAGE_SIZE:
+            raise ValueError(f'You can fetch at most {CONSTANTS.MAX_LOAN_PAGE_SIZE} loan.')
 
         if sort not in CONSTANTS.LOAN_SORT_TYPES:
             raise InvalidSort(f'Loans can only be sorted by: {", ".join(CONSTANTS.LOAN_SORT_TYPES)}')
 
         sort = CONSTANTS.LOAN_SORT_TYPES[sort]
 
-        page_size = 40 if quantity > 40 else quantity
-
         loan_params = {
             'sort': sort if ascending_sort else f'-{sort}',
-            'pageSize': page_size,
-            'offset': page_size * start_page,
+            'pageSize': quantity,
+            'offset': quantity * page_num,
         }
 
         if max_remaining_term is not None:
@@ -237,23 +303,10 @@ class API:
             for idx, type_ in enumerate(loan_types):
                 loan_params[f'loanTermId[{idx}]'] = CONSTANTS.get_loan_type(type_)
 
-        loans = []
-
-        for _ in range(math.ceil(quantity / 40)):
-            loans_data = self._session.request(
-                url=ENDPOINTS.LOANS_URI,
-                params=loan_params,
-            )['data']
-
-            if len(loans_data) == 0:
-                break
-
-            # Extend current loan list with new loans
-            loans.extend(loans_data)
-
-            loan_params['offset'] += 40
-
-        return loans if raw else pd.DataFrame(loans)
+        return self._session.request(
+            url=ENDPOINTS.LOANS_URI,
+            params=loan_params,
+        )
 
     def get_loan_details(
             self,

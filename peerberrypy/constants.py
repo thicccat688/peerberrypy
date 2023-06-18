@@ -13,6 +13,8 @@ class CONSTANTS:
 
     OUTPUT_TYPES = {'json', 'bytes'}
 
+    MAX_LOAN_PAGE_SIZE = 40
+
     LOAN_TYPES_ID = {
         'short_term': 1,
         'long_term': 2,
