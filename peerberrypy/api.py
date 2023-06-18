@@ -516,7 +516,7 @@ class API:
 
     def get_transactions(
             self,
-            quantity: int,
+            quantity: Optional[int] = None,
             start_page: int = 0,
             start_date: Optional[date] = None,
             end_date: Optional[date] = None,
@@ -542,7 +542,7 @@ class API:
             'pageSize': quantity,
             'startDate': start_date,
             'endDate': end_date,
-            'offset': quantity * start_page,
+            'offset': quantity * start_page if quantity is not None and start_date is not None else None,
         }
 
         if transaction_types is not None:

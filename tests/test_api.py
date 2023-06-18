@@ -97,14 +97,12 @@ def test_summary():
 
 def test_transactions():
     assert isinstance(
-        peerberry_client.get_transactions(
-            quantity=1000,
-            start_date=CONSTANTS.START_DATE,
-            end_date=CONSTANTS.END_DATE,
-        ),
+        peerberry_client.get_transactions(),
         pd.DataFrame,
     )
 
+
+def test_mass_transactions():
     assert isinstance(
         peerberry_client.get_mass_transactions(
             quantity=1000,
