@@ -125,7 +125,7 @@ class API:
     def get_loans(
             self,
             quantity: int,
-            start_page: int = 1,
+            start_page: int = 0,
             max_remaining_term: int = None,
             min_remaining_term: int = None,
             max_interest_rate: float = None,
@@ -174,7 +174,7 @@ class API:
         loan_params = {
             'sort': sort if ascending_sort else f'-{sort}',
             'pageSize': page_size,
-            'offset': math.ceil(page_size * (start_page - 1)),
+            'offset': page_size * start_page,
         }
 
         if max_remaining_term is not None:
@@ -315,7 +315,7 @@ class API:
     def get_investments(
             self,
             quantity: int,
-            start_page: int = 1,
+            start_page: int = 0,
             max_date_of_purchase: int = None,
             min_date_of_purchase: int = None,
             max_interest_rate: float = None,
@@ -367,7 +367,7 @@ class API:
             'sort': sort if ascending_sort else f'-{sort}',
             'pageSize': quantity,
             'type': 'CURRENT' if current else 'FINISHED',
-            'offset': math.ceil(quantity * (start_page - 1)),
+            'offset': quantity * start_page,
         }
 
         if max_date_of_purchase is not None:
@@ -541,7 +541,7 @@ class API:
             'pageSize': quantity,
             'startDate': start_date,
             'endDate': end_date,
-            'offset': math.ceil(quantity * (start_page - 1)),
+            'offset': quantity * start_page,
         }
 
         if transaction_types is not None:
