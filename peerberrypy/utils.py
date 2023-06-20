@@ -1,4 +1,5 @@
 import copy
+from decimal import Decimal, DecimalException
 
 
 class Utils:
@@ -12,9 +13,9 @@ class Utils:
 
                 for k1, v1 in v.items():
                     try:
-                        nested_obj[k1] = float(v1)
+                        nested_obj[k1] = Decimal.from_float(v1) if isinstance(v1, float) else Decimal(v1)
 
-                    except (ValueError, TypeError):
+                    except (ValueError, TypeError, DecimalException):
                         parsed_obj[k1] = v1
 
                 parsed_obj[k] = nested_obj
@@ -22,9 +23,9 @@ class Utils:
                 continue
 
             try:
-                parsed_obj[k] = float(v)
+                parsed_obj[k] = Decimal.from_float(v) if isinstance(v, float) else Decimal(v)
 
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, DecimalException):
                 parsed_obj[k] = v
 
         return parsed_obj

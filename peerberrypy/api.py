@@ -1,10 +1,12 @@
+import decimal
+
 from peerberrypy.endpoints import ENDPOINTS
 from peerberrypy.request_handler import RequestHandler
 from peerberrypy.exceptions import InvalidCredentials, InvalidPeriodicity, InsufficientFunds, InvalidSort, \
     InvalidType, PeerberryException
 from peerberrypy.constants import CONSTANTS
 from peerberrypy.utils import Utils
-from typing import Union
+from typing import Union, Optional
 from datetime import date
 import pandas as pd
 import warnings
@@ -128,10 +130,10 @@ class API:
             start_page: int = 0,
             max_remaining_term: int = None,
             min_remaining_term: int = None,
-            max_interest_rate: float = None,
-            min_interest_rate: float = None,
-            max_available_amount: float = None,
-            min_available_amount: float = None,
+            max_interest_rate: Optional[decimal.Decimal] = None,
+            min_interest_rate: Optional[decimal.Decimal] = None,
+            max_available_amount: Optional[decimal.Decimal] = None,
+            min_available_amount: Optional[decimal.Decimal] = None,
             countries: list = None,
             originators: list = None,
             loan_types: list = None,
@@ -318,10 +320,10 @@ class API:
             start_page: int = 0,
             max_date_of_purchase: int = None,
             min_date_of_purchase: int = None,
-            max_interest_rate: float = None,
-            min_interest_rate: float = None,
-            max_invested_amount: float = None,
-            min_invested_amount: float = None,
+            max_interest_rate: Optional[decimal.Decimal] = None,
+            min_interest_rate: Optional[decimal.Decimal] = None,
+            max_invested_amount: Optional[decimal.Decimal] = None,
+            min_invested_amount: Optional[decimal.Decimal] = None,
             countries: list = None,
             loan_types: list = None,
             sort: str = 'loan_amount',
@@ -498,17 +500,17 @@ class API:
 
         return {
             'balance_data': {
-                'opening_balance': float(summary_data.get('openingBalance') or 0),
+                'opening_balance': decimal.Decimal(summary_data.get('openingBalance') or 0),
                 'opening_date': summary_data.get('openingDate'),
-                'closing_balance': float(summary_data.get('closingBalance') or 0),
+                'closing_balance': decimal.Decimal(summary_data.get('closingBalance') or 0),
                 'closing_date': summary_data.get('closingDate'),
             },
             'cash_flow_data': {
-                'principal_payments': float(summary_data['operations'].get('PRINCIPAL') or 0),
-                'interest_payments': float(summary_data['operations'].get('INTEREST') or 0),
-                'investment_payments': float(summary_data['operations'].get('INVESTMENT') or 0),
-                'deposits': float(summary_data['operations'].get('DEPOSIT') or 0),
-                'withdrawals': float(summary_data['operations'].get('WITHDRAWAL') or 0),
+                'principal_payments': decimal.Decimal(summary_data['operations'].get('PRINCIPAL') or 0),
+                'interest_payments': decimal.Decimal(summary_data['operations'].get('INTEREST') or 0),
+                'investment_payments': decimal.Decimal(summary_data['operations'].get('INVESTMENT') or 0),
+                'deposits': decimal.Decimal(summary_data['operations'].get('DEPOSIT') or 0),
+                'withdrawals': decimal.Decimal(summary_data['operations'].get('WITHDRAWAL') or 0),
             },
             'currency': summary_data.get('currency'),
         }
