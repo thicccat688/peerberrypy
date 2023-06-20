@@ -39,7 +39,9 @@ class RequestHandler:
             parsed_response = response.content
 
         else:
-            parsed_response = response.json()
+            import decimal
+            import json
+            parsed_response = json.loads(response.text, parse_float=decimal.Decimal)
 
         if response.status_code >= 400:
             error_response = response.json()

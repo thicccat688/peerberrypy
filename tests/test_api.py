@@ -1,3 +1,4 @@
+from decimal import Decimal
 from tests.constants import CONSTANTS
 from peerberrypy.api import API
 
@@ -63,8 +64,8 @@ def test_investments():
         peerberry_client.get_investments(
             quantity=100,
             current=True,
-            max_interest_rate=20,
-            min_interest_rate=10,
+            max_interest_rate=Decimal(20),
+            min_interest_rate=Decimal(10),
             countries=['Kazakhstan', 'Lithuania'],
         ),
         pd.DataFrame,
@@ -74,8 +75,8 @@ def test_investments():
         peerberry_client.get_investments(
             quantity=100,
             current=False,
-            max_interest_rate=20,
-            min_interest_rate=10,
+            max_interest_rate=Decimal(20),
+            min_interest_rate=Decimal(10),
             countries=['Kazakhstan', 'Lithuania'],
         ),
         pd.DataFrame,
