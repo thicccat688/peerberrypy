@@ -43,7 +43,7 @@ class CONSTANTS:
     }
 
     CURRENT_INVESTMENT_SORT_TYPES = {
-        'purchase_date': 'dateOfPurchcase',
+        'purchase_date': 'dateOfPurchase',
         'interest_rate': 'interestRate',
         'loan_amount': 'amount',
         'estimated_final_payment_date': 'estimatedFinalPaymentDate',
@@ -51,7 +51,7 @@ class CONSTANTS:
 
     FINISHED_INVESTMENT_SORT_TYPES = {
         'final_payment_date': 'finishedAt',
-        'purchase_date': 'dateOfPurchcase',
+        'purchase_date': 'dateOfPurchase',
         'interest_rate': 'interestRate',
         'loan_amount': 'amount',
         'estimated_final_payment_date': 'estimatedFinalPaymentDate',
