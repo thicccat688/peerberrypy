@@ -17,10 +17,10 @@ import math
 class API:
     def __init__(
             self,
-            email: str = None,
-            password: str = None,
-            tfa_secret: str = None,
-            access_token: str = None,
+            email: Optional[str] = None,
+            password: Optional[str] = None,
+            tfa_secret: Optional[str] = None,
+            access_token: Optional[str] = None,
     ):
         """
         Peerberry API wrapper with all relevant Peerberry functionalities.
@@ -128,19 +128,19 @@ class API:
             self,
             quantity: int,
             start_page: int = 0,
-            max_remaining_term: int = None,
-            min_remaining_term: int = None,
+            max_remaining_term: Optional[int] = None,
+            min_remaining_term: Optional[int] = None,
             max_interest_rate: Optional[decimal.Decimal] = None,
             min_interest_rate: Optional[decimal.Decimal] = None,
             max_available_amount: Optional[decimal.Decimal] = None,
             min_available_amount: Optional[decimal.Decimal] = None,
-            countries: list = None,
-            originators: list = None,
-            loan_types: list = None,
+            countries: Optional[list[str]] = None,
+            originators: Optional[list[str]] = None,
+            loan_types: Optional[list[str]] = None,
             sort: str = 'loan_amount',
             ascending_sort: bool = False,
-            group_guarantee: bool = None,
-            exclude_invested_loans: bool = None,
+            group_guarantee: Optional[bool] = None,
+            exclude_invested_loans: Optional[bool] = None,
             raw: bool = False,
     ) -> Union[pd.DataFrame, list]:
         """
@@ -297,7 +297,7 @@ class API:
     def purchase_loan(
             self,
             loan_id: int,
-            amount: int,
+            amount: decimal.Decimal,
     ) -> str:
         """
         :param loan_id: ID of loan to purchase
@@ -318,14 +318,14 @@ class API:
             self,
             quantity: int,
             start_page: int = 0,
-            max_date_of_purchase: int = None,
-            min_date_of_purchase: int = None,
+            max_date_of_purchase: Optional[int] = None,
+            min_date_of_purchase: Optional[int] = None,
             max_interest_rate: Optional[decimal.Decimal] = None,
             min_interest_rate: Optional[decimal.Decimal] = None,
             max_invested_amount: Optional[decimal.Decimal] = None,
             min_invested_amount: Optional[decimal.Decimal] = None,
-            countries: list = None,
-            loan_types: list = None,
+            countries: Optional[list[str]] = None,
+            loan_types: Optional[list[str]] = None,
             sort: str = 'loan_amount',
             ascending_sort: bool = False,
             current: bool = True,
@@ -422,7 +422,7 @@ class API:
             self,
             quantity: int = 100000000000,
             sort: str = 'invested_amount',
-            countries: list = None,
+            countries: Optional[list[str]] = None,
             ascending_sort: bool = False,
             current: bool = True,
             raw: bool = False,
@@ -518,11 +518,11 @@ class API:
     def get_transactions(
             self,
             quantity: int,
-            start_page: int,
-            start_date: date,
-            end_date: date,
-            periodicity: str = None,
-            transaction_types: list = None,
+            start_page: int = 0,
+            start_date: Optional[date] = None,
+            end_date: Optional[date] = None,
+            periodicity: Optional[str] = None,
+            transaction_types: Optional[list[str]] = None,
             raw: bool = False,
     ) -> Union[pd.DataFrame, list]:
         """
@@ -575,10 +575,10 @@ class API:
     def get_mass_transactions(
             self,
             quantity: int,
-            start_date: date,
-            end_date: date,
-            transaction_types: list = None,
-            periodicity: str = None,
+            start_date: Optional[date],
+            end_date: Optional[date],
+            transaction_types: Optional[list[str]] = None,
+            periodicity: Optional[str] = None,
             sort: str = 'amount',
             ascending_sort: bool = False,
             raw: bool = False,
