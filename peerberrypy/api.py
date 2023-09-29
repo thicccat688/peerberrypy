@@ -298,21 +298,19 @@ class API:
             self,
             loan_id: int,
             amount: int,
-    ) -> str:
+    ) -> dict:
         """
         :param loan_id: ID of loan to purchase
         :param amount: Amount to invest in loan (Amount denominated in €)
-        :return: Success message upon purchasing loan
+        :return: Object containing an order (not transaction) id
         """
 
-        self._session.request(
+        return self._session.request(
             url=f'{ENDPOINTS.LOANS_URI}/{loan_id}',
             method='POST',
             data={'amount': str(amount)},
             exception_type=InsufficientFunds,
         )
-
-        return f'Successfully invested €{amount} in loan {loan_id}.'
 
     def get_investments(
             self,
