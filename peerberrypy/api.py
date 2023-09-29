@@ -6,7 +6,8 @@ from peerberrypy.exceptions import InvalidCredentials, InvalidPeriodicity, Insuf
     InvalidType, PeerberryException
 from peerberrypy.constants import CONSTANTS
 from peerberrypy.utils import Utils
-from typing import Union, Optional
+
+from typing import Union, Optional, List
 from datetime import date
 import pandas as pd
 import warnings
@@ -134,9 +135,9 @@ class API:
             min_interest_rate: Optional[decimal.Decimal] = None,
             max_available_amount: Optional[decimal.Decimal] = None,
             min_available_amount: Optional[decimal.Decimal] = None,
-            countries: Optional[list[str]] = None,
-            originators: Optional[list[str]] = None,
-            loan_types: Optional[list[str]] = None,
+            countries: Optional[List[str]] = None,
+            originators: Optional[List[str]] = None,
+            loan_types: Optional[List[str]] = None,
             sort: str = 'loan_amount',
             ascending_sort: bool = False,
             group_guarantee: Optional[bool] = None,
@@ -324,8 +325,8 @@ class API:
             min_interest_rate: Optional[decimal.Decimal] = None,
             max_invested_amount: Optional[decimal.Decimal] = None,
             min_invested_amount: Optional[decimal.Decimal] = None,
-            countries: Optional[list[str]] = None,
-            loan_types: Optional[list[str]] = None,
+            countries: Optional[List[str]] = None,
+            loan_types: Optional[List[str]] = None,
             sort: str = 'loan_amount',
             ascending_sort: bool = False,
             current: bool = True,
@@ -422,7 +423,7 @@ class API:
             self,
             quantity: int = 100000000000,
             sort: str = 'invested_amount',
-            countries: Optional[list[str]] = None,
+            countries: Optional[List[str]] = None,
             ascending_sort: bool = False,
             current: bool = True,
             raw: bool = False,
@@ -522,7 +523,7 @@ class API:
             start_date: Optional[date] = None,
             end_date: Optional[date] = None,
             periodicity: Optional[str] = None,
-            transaction_types: Optional[list[str]] = None,
+            transaction_types: Optional[List[str]] = None,
             raw: bool = False,
     ) -> Union[pd.DataFrame, list]:
         """
@@ -577,7 +578,7 @@ class API:
             quantity: int,
             start_date: Optional[date],
             end_date: Optional[date],
-            transaction_types: Optional[list[str]] = None,
+            transaction_types: Optional[List[str]] = None,
             periodicity: Optional[str] = None,
             sort: str = 'amount',
             ascending_sort: bool = False,
