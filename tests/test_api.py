@@ -125,3 +125,7 @@ def test_originators():
 
 def test_logout():
     assert isinstance(peerberry_client.logout(), str)
+
+
+def test_globals():
+    assert isinstance(peerberry_client.get_globals(), dict)

@@ -640,6 +640,14 @@ class API:
 
         return transactions_data if raw else parsed_transactions_data[0:quantity]
 
+    def get_globals(self) -> dict:
+        """
+        :return: The global data from PeerBerry API that contains, among others, countries and originators.
+        Unlike :py:meth:`get_originators` or :py:meth:`get_countries` it doesn't cache or transform the response.
+        """
+        import time
+        return self._session.request(ENDPOINTS.GLOBALS_URI, params={'t': int(time.time())})
+
     def login(self) -> str:
         """
         :return: Access token to authenticate to Peerberry API
@@ -713,8 +721,16 @@ class API:
 
     @staticmethod
     def get_countries() -> dict:
+        """
+        :return: The list of countries accepted by the API.
+        The data is cached after the first call, and all subsequent calls return the same value.
+        """
         return CONSTANTS.get_countries()
 
     @staticmethod
     def get_originators() -> dict:
+        """
+        :return: The details of all current originators as a dict[str, dict].
+        The data is cached after the first call, and all subsequent calls return the same value.
+        """
         return CONSTANTS.get_originators()
