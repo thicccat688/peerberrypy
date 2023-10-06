@@ -1,3 +1,4 @@
+import unittest.mock
 from decimal import Decimal
 from tests.constants import CONSTANTS
 from peerberrypy.api import API
@@ -42,12 +43,20 @@ def test_investment_status():
 
 
 def test_loans():
+    with unittest.mock.patch('peerberrypy.api.API.get_loans_page') as get_loans_page:
+        get_loans_page.return_value = {
+            'data': [() for _ in range(40)],
+        }
+        assert isinstance(peerberry_client.get_loans(1000), pd.DataFrame)
+        assert get_loans_page.call_count == 1000/40
+
+
+def test_loans_page():
     assert isinstance(
-        peerberry_client.get_loans(
-            quantity=100,
-            sort='loan_amount',
+        peerberry_client.get_loans_page(
+            page_num=0,
         ),
-        pd.DataFrame,
+        dict,
     )
 
 
