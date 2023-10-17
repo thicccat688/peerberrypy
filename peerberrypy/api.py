@@ -382,7 +382,7 @@ class API:
             ascending_sort: bool = False,
             current: bool = True,
             raw: bool = False,
-    ) -> Union[pd.DataFrame, list]:
+    ) -> Union[pd.DataFrame, dict]:
         """
         If you're going to fetch more than ~350 investments it's recommended to use the get_mass_investments function.
         It provides more details about the investments, but has fewer filters available.
@@ -466,9 +466,9 @@ class API:
         investments_data = self._session.request(
             url=ENDPOINTS.INVESTMENTS_URI,
             params=investment_params,
-        )['data']
+        )
 
-        return investments_data if raw else pd.DataFrame(investments_data)
+        return investments_data if raw else pd.DataFrame(investments_data['data'])
 
     def get_mass_investments(
             self,
