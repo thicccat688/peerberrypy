@@ -408,14 +408,10 @@ class API:
 
         sort_types = CONSTANTS.CURRENT_INVESTMENT_SORT_TYPES if current else CONSTANTS.FINISHED_INVESTMENT_SORT_TYPES
 
-        if sort not in CONSTANTS.LOAN_SORT_TYPES:
+        if sort not in sort_types:
             raise InvalidSort(f'Loans can only be sorted by: {", ".join(sort_types)}')
 
-        if current:
-            sort = sort_types[sort]
-
-        else:
-            sort = sort_types[sort]
+        sort = sort_types[sort]
 
         investment_params = {
             'sort': sort if ascending_sort else f'-{sort}',
