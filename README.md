@@ -7,7 +7,7 @@ Peerberry platform: https://peerberry.com/
 
 ## Requirements 
 
-Python 3.7+
+Python 3.8+
 
 Main dependencies:
   <ul>
@@ -57,7 +57,7 @@ Investor/portfolio data functions:
   get_investment_status -> Gets percentage of funds in different investment statuses (Current, late by 1-15 days, 16-30 days, and 31-60 days).
  
 Marketplace/loan data functions:
-  get_loans -> Gets loans available for investment in the Peerberry marketplace according to the filters you specify.
+  get_loans & get_loans_page -> Gets loans available for investment in the Peerberry marketplace according to the filters you specify. get_loans_page also returns metadata.
   get_loan_details -> Gets available information about the loan, the borrower, and the loan's payments schedule.
   purchase_loan -> Invests in a loan with the amount you specify.
 
