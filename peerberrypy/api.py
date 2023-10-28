@@ -1,5 +1,6 @@
 import decimal
 import functools
+import typing
 
 from peerberrypy.endpoints import ENDPOINTS
 from peerberrypy.request_handler import RequestHandler
@@ -10,10 +11,11 @@ from peerberrypy.utils import Utils
 
 from typing import Union, Optional, List
 from datetime import date
-import pandas as pd
 import warnings
-import pyotp
 import math
+
+if typing.TYPE_CHECKING:
+    import pandas as pd
 
 
 class API:
@@ -99,7 +101,7 @@ class API:
             end_date: date,
             periodicity: str = 'day',
             raw: bool = False,
-    ) -> Union[pd.DataFrame, list]:
+    ) -> 'Union[pd.DataFrame, list]':
         """
         :param start_date: Start date of profit data
         :param end_date: End date of profit data
@@ -117,7 +119,11 @@ class API:
             url=f'{ENDPOINTS.PROFIT_OVERVIEW_URI}/{start_date}/{end_date}/{periodicity}',
         )
 
-        return profit_overview if raw else pd.DataFrame(profit_overview)
+        if raw:
+            return profit_overview
+
+        import pandas as pd
+        return pd.DataFrame(profit_overview)
 
     def get_investment_status(self) -> dict:
         """
@@ -144,7 +150,7 @@ class API:
             group_guarantee: Optional[bool] = None,
             exclude_invested_loans: Optional[bool] = None,
             raw: bool = False,
-    ) -> Union[pd.DataFrame, List[dict]]:
+    ) -> 'Union[pd.DataFrame, List[dict]]':
         """
         :param quantity: Amount of loans to fetch
         :param start_page: Number of start page to start getting loans from
@@ -190,7 +196,11 @@ class API:
             # Extend current loan list with new loans
             loans.extend(loans_data)
 
-        return loans if raw else pd.DataFrame(loans)
+        if raw:
+            return loans
+
+        import pandas as pd
+        return pd.DataFrame(loans)
 
     def get_loans_page(
             self,
@@ -382,7 +392,7 @@ class API:
             ascending_sort: bool = False,
             current: bool = True,
             raw: bool = False,
-    ) -> Union[pd.DataFrame, dict]:
+    ) -> 'Union[pd.DataFrame, dict]':
         """
         If you're going to fetch more than ~350 investments it's recommended to use the get_mass_investments function.
         It provides more details about the investments, but has fewer filters available.
@@ -468,7 +478,11 @@ class API:
             params=investment_params,
         )
 
-        return investments_data if raw else pd.DataFrame(investments_data['data'])
+        if raw:
+            return investments_data
+
+        import pandas as pd
+        return pd.DataFrame(investments_data['data'])
 
     def get_mass_investments(
             self,
@@ -478,7 +492,7 @@ class API:
             ascending_sort: bool = False,
             current: bool = True,
             raw: bool = False,
-    ) -> Union[pd.DataFrame, bytes]:
+    ) -> 'Union[pd.DataFrame, bytes]':
         """
         This function has a lot better performance than the get_investments function for larger quantities of
         investments and should be used when fetching more than ~350 investment and has more detailed loan attributes,
@@ -522,12 +536,14 @@ class API:
 
         sort = CONSTANTS.LOAN_EXPORT_SORT_TYPES[sort]
 
-        investment_data = pd.read_excel(
+        if raw:
+            return investments
+
+        import pandas as pd
+        return pd.read_excel(
             io=investments,
             sheet_name=0,
         ).sort_values(by=sort, ascending=ascending_sort)[0:quantity]
-
-        return investments if raw else investment_data
 
     def get_account_summary(
             self,
@@ -576,7 +592,7 @@ class API:
             periodicity: Optional[str] = None,
             transaction_types: Optional[List[str]] = None,
             raw: bool = False,
-    ) -> Union[pd.DataFrame, list]:
+    ) -> 'Union[pd.DataFrame, list]':
         """
         If you want the transactions' Excel bytes use the get_mass_transactions function.
         The get_transactions function should be used for any other use case since it is much faster.
@@ -622,7 +638,11 @@ class API:
             params=transactions_params,
         )
 
-        return transactions_data if raw else pd.DataFrame(transactions_data)
+        if raw:
+            return transactions_data
+
+        import pandas as pd
+        return pd.DataFrame(transactions_data)
 
     def get_mass_transactions(
             self,
@@ -634,7 +654,7 @@ class API:
             sort: str = 'amount',
             ascending_sort: bool = False,
             raw: bool = False,
-    ) -> Union[pd.DataFrame, bytes]:
+    ) -> 'Union[pd.DataFrame, bytes]':
         """
         This function has a lot worse performance than the get_transactions function and should only be used
         when trying to get the transactions' Excel bytes.
@@ -687,12 +707,15 @@ class API:
             output_type='bytes',
         )
 
+        if raw:
+            return transactions_data
+
+        import pandas as pd
         parsed_transactions_data = pd.read_excel(
             io=transactions_data,
             sheet_name=0,
         ).sort_values(by=sort, ascending=ascending_sort)
-
-        return transactions_data if raw else parsed_transactions_data[0:quantity]
+        return parsed_transactions_data[0:quantity]
 
     def login(self) -> str:
         """
@@ -730,6 +753,8 @@ class API:
             self._session.add_header({'Authorization': f'Bearer {self.access_token}'})
 
             return f'Bearer {self.access_token}'
+
+        import pyotp
 
         totp_data = {
             'code': pyotp.TOTP(self._tfa_secret).now(),

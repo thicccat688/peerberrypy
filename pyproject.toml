@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "peerberrypy"
+version = "1.7.0"
+authors = [
+    { name = "Tomás Perestrelo", email = "tomasperestrelo21@gmail.com" }
+]
+dependencies = [
+    "cloudscraper>=1.2"
+]
+description = "Python API Wrapper for PeerBerry"
+keywords = ['python', 'api', 'api-wrapper', 'peerberrypy']
+license = { file = "LICENSE.MD" }
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.urls]
+Repository = "https://github.com/thicccat688/peerberrypy"
+
+[project.optional-dependencies]
+pandas = ['pandas<2', 'openpyxl>=3.0,<4']
+otp = ['pyotp>=2.7.0,<3']

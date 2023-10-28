@@ -10,18 +10,20 @@ Peerberry platform: https://peerberry.com/
 Python 3.7+
 
 Main dependencies:
-  <ul>
-    <li>pandas for the large data handling.</li>
-    <li>pyotp for handling two-factor authentication.</li>
-    <li>requests for handling HTTP requests to the Peerberry API.</li>
-    <li>openpyxl for parsing spreadsheets supplied by Peerberry.</li>
-  </ul>
+- cloudscraper for accessing the API without getting blocked by CF anti-DDOS,
+
+Optional dependencies:
+- pandas for the large data handling,
+- openpyxl for parsing spreadsheets supplied by Peerberry,
+- pyotp for handling two-factor authentication.
 
 ## Installation
 
 ```bash
 pip install peerberrypy
 ```
+
+Replace with `peerberrypy[pandas]` to install pandas and openpyxl, `peerberrypy[otp]` to install pyotp, or `peerberrypy[pandas,otp]` to install all.
 
 ## Usage
 
