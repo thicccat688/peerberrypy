@@ -380,8 +380,8 @@ class API:
             self,
             quantity: int,
             start_page: int = 0,
-            max_date_of_purchase: Optional[int] = None,
-            min_date_of_purchase: Optional[int] = None,
+            max_date_of_purchase: Optional[date] = None,
+            min_date_of_purchase: Optional[date] = None,
             max_interest_rate: Optional[decimal.Decimal] = None,
             min_interest_rate: Optional[decimal.Decimal] = None,
             max_invested_amount: Optional[decimal.Decimal] = None,
@@ -418,14 +418,10 @@ class API:
 
         sort_types = CONSTANTS.CURRENT_INVESTMENT_SORT_TYPES if current else CONSTANTS.FINISHED_INVESTMENT_SORT_TYPES
 
-        if sort not in CONSTANTS.LOAN_SORT_TYPES:
+        if sort not in sort_types:
             raise InvalidSort(f'Loans can only be sorted by: {", ".join(sort_types)}')
 
-        if current:
-            sort = sort_types[sort]
-
-        else:
-            sort = sort_types[sort]
+        sort = sort_types[sort]
 
         investment_params = {
             'sort': sort if ascending_sort else f'-{sort}',
