@@ -35,15 +35,10 @@ class RequestHandler:
             **kwargs,
         )
 
-        if output_type == 'bytes':
-            parsed_response = response.content
-
-        else:
-            import decimal
-            import json
-            parsed_response = json.loads(response.text, parse_float=decimal.Decimal)
-
         if response.status_code >= 400:
+            if 'application/json' not in response.headers['Content-Type']:
+                raise PeerberryException('Unexpected server response')
+
             error_response = response.json()
 
             errors = error_response.get('errors')
@@ -57,6 +52,14 @@ class RequestHandler:
                 raise exception_type(list(error_response[0].values())[0])
 
             raise exception_type(list(error_response.values())[0])
+
+        if output_type == 'bytes':
+            parsed_response = response.content
+
+        else:
+            import decimal
+            import json
+            parsed_response = json.loads(response.text, parse_float=decimal.Decimal)
 
         return parsed_response
 
