@@ -176,7 +176,9 @@ class API:
 
         page_size = min(CONSTANTS.MAX_LOAN_PAGE_SIZE, quantity)
 
+        argv.pop('self', None)
         argv.pop('quantity', None)
+        argv.pop('raw', None)
         argv.pop('start_page', None)
         do_get_loans_page = functools.partial(self.get_loans_page, **argv)
 
