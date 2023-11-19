@@ -132,6 +132,13 @@ class API:
 
         return Utils.parse_peerberry_items(self._session.request(url=ENDPOINTS.INVESTMENTS_STATUS_URI))
 
+    def get_investment_originators_overview(self) -> dict:
+        """
+        :return: Percentage of funds in current loan originators
+        """
+
+        return Utils.parse_peerberry_originators(self._session.request(url=ENDPOINTS.INVESTMENTS_ORIGINATORS_URI))
+
     def get_loans(
             self,
             quantity: int,

@@ -11,6 +11,7 @@ class ENDPOINTS:
 
     INVESTMENTS_STATUS_URI = f'{BASE_URI}/v2/investor/overview/investment_statuses/current'
     INVESTMENTS_URI = f'{BASE_URI}/v1/investor/investments'
+    INVESTMENTS_ORIGINATORS_URI = f'{BASE_URI}/v1/investor/overview/originators'
     INVESTMENTS_AGREEMENT_URI = f'{BASE_URI}/v1/investments'
 
     LOANS_URI = f'{BASE_URI}/v1/loans'
