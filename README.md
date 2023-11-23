@@ -57,6 +57,7 @@ Investor/portfolio data functions:
   get_overview -> Gets portfolio overview (Balance, total invested, total profit, net annual return, etc.).
   get_profit_overview -> Gets portfolio's profit on a daily, monthly or yearly basis (Data used in your profile's profit chart).
   get_investment_status -> Gets percentage of funds in different investment statuses (Current, late by 1-15 days, 16-30 days, and 31-60 days).
+  get_investment_originators_overview -> Gets percentage of funds in different loan originators.
  
 Marketplace/loan data functions:
   get_loans & get_loans_page -> Gets loans available for investment in the Peerberry marketplace according to the filters you specify. get_loans_page also returns metadata.
