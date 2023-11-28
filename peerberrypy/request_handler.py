@@ -5,7 +5,7 @@ import cloudscraper
 
 
 class RequestHandler:
-    def __init__(self):
+    def __init__(self, request_params: dict):
         """ Request handler for internal use with Peerberry's specifications. """
         self.__session = cloudscraper.create_scraper(
             browser={
@@ -14,6 +14,7 @@ class RequestHandler:
                 'desktop': True,
             }
         )
+        self._request_params = request_params
 
     def request(
             self,
@@ -29,10 +30,13 @@ class RequestHandler:
         if output_type not in output_types:
             raise ValueError(f'Output type must be one of the following: {", ".join(output_types)}')
 
+        requests_params = self._request_params.copy()
+        requests_params.update(kwargs)
+
         response = self.__session.request(
             method=method,
             url=url,
-            **kwargs,
+            **requests_params,
         )
 
         if response.status_code >= 400:
