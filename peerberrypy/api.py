@@ -147,6 +147,64 @@ class API:
         import pandas as pd
         return pd.DataFrame(investment_status)
 
+    def get_overview_originators(
+            self,
+            raw: bool = False,
+    ) -> 'Union[pd.DataFrame, list]':
+        """
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: Originators overview for portfolio
+        """
+
+        overview_originators = Utils.parse_peerberry_items(self._session.request(
+            url=f'{ENDPOINTS.ORIGINATORS_OVERVIEW_URI}',
+        ))
+
+        if raw:
+            return overview_originators
+
+        import pandas as pd
+        return pd.DataFrame(overview_originators)
+
+    def get_overview_investment_types(
+            self,
+            raw: bool = False,
+    ) -> 'Union[pd.DataFrame, list]':
+        """
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: Investment types overview for portfolio
+        """
+
+        investment_types = Utils.parse_peerberry_items(self._session.request(
+            url=f'{ENDPOINTS.INVESTMENT_TYPES_OVERVIEW_URI}',
+        ))
+
+        if raw:
+            return investment_types
+
+        import pandas as pd
+        return pd.DataFrame(investment_types)
+
+    def get_overview_countries(
+            self,
+            raw: bool = False,
+    ) -> 'Union[pd.DataFrame, list]':
+        """
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: Country overview for portfolio
+        """
+
+        overview_countries = Utils.parse_peerberry_items(self._session.request(
+            url=f'{ENDPOINTS.COUNTRIES_OVERVIEW_URI}',
+        ))
+
+
+        if raw:
+            return overview_countries
+
+        import pandas as pd
+        return pd.DataFrame(overview_countries)
+        
     def get_loans(
             self,
             quantity: int,
