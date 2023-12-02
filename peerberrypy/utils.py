@@ -24,3 +24,13 @@ class Utils:
                 pass
 
         return obj
+
+
+    @staticmethod
+    def parse_peerberry_originators(__obj: list) -> dict:
+        parsed_obj = {}
+
+        for i in __obj:
+            parsed_obj[i['originator']] = i
+
+        return parsed_obj

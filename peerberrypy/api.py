@@ -160,9 +160,11 @@ class API:
         :return: Originators overview for portfolio
         """
 
-        overview_originators = Utils.parse_peerberry_items(self._session.request(
-            url=f'{ENDPOINTS.ORIGINATORS_OVERVIEW_URI}',
-        ))
+        overview_originators = Utils.parse_peerberry_originators(
+            Utils.parse_peerberry_items(self._session.request(
+                url=f'{ENDPOINTS.ORIGINATORS_OVERVIEW_URI}',
+            ))
+        )
 
         if raw:
             return overview_originators
