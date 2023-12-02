@@ -351,15 +351,22 @@ class API:
             url=f'{ENDPOINTS.LOANS_URI}/{loan_id}',
         ))
 
+        loan_details = {
+            'borrower': credit_data.get('borrower'),
+            'loan': credit_data.get('loan'),
+            'originator': credit_data.get('originator'),
+            'pledge': credit_data.get('pledge')
+        }
+
         schedule_data = credit_data['schedule']['data']
 
-        return {
-            'borrower_data': credit_data.get('borrower'),
-            'loan_data': credit_data.get('loan'),
-            'originator': credit_data.get('originator'),
-            'pledge': credit_data.get('pledge'),
-            'schedule_data': schedule_data if raw else pd.DataFrame(schedule_data),
-        }
+        if raw:
+            loan_details['schedule_data'] = schedule_data
+        else:
+            import pandas as pd
+            loan_details['schedule_data'] = pd.DataFrame(schedule_data)
+
+        return loan_details
 
     def get_agreement(self, loan_id: int, lang: str = 'en') -> bytes:
         """
