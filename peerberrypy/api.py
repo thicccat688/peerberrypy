@@ -60,7 +60,10 @@ class API:
         :return: Basic information, accounts & balance information
         """
 
-        return Utils.parse_peerberry_items(self._session.request(url=ENDPOINTS.PROFILE_URI))
+        return Utils.parse_peerberry_items(self._session.request(
+            url=ENDPOINTS.PROFILE_URI
+        ))
+
 
     def get_loyalty_tier(self) -> dict:
         """
@@ -89,11 +92,9 @@ class API:
         :return: Available balance, total invested, total profit, current investments, net annual return, etc.
         """
 
-        return Utils.parse_peerberry_items(
-            self._session.request(
-                url=ENDPOINTS.OVERVIEW_URI,
-            )
-        )
+        return Utils.parse_peerberry_items(self._session.request(
+            url=ENDPOINTS.OVERVIEW_URI
+        ))
 
     def get_profit_overview(
             self,
@@ -115,10 +116,10 @@ class API:
         if periodicity not in periodicities:
             raise InvalidPeriodicity(f'Periodicity must be one of the following: {", ".join(periodicities)}')
 
-        profit_overview = self._session.request(
+        profit_overview = Utils.parse_peerberry_items(self._session.request(
             url=f'{ENDPOINTS.PROFIT_OVERVIEW_URI}/{start_date}/{end_date}/{periodicity}',
-        )
-
+        ))
+        
         if raw:
             return profit_overview
 
@@ -130,7 +131,9 @@ class API:
         :return: Percentage of funds in current loans and late loans (In 1-15, 16-30, and 31-60 day intervals)
         """
 
-        return Utils.parse_peerberry_items(self._session.request(url=ENDPOINTS.INVESTMENTS_STATUS_URI))
+        investment_status = Utils.parse_peerberry_items(self._session.request(
+            url=ENDPOINTS.INVESTMENTS_STATUS_URI
+        ))
 
     def get_loans(
             self,
@@ -332,9 +335,9 @@ class API:
         :return: The borrower's data, the loan's data, and the repayment schedule
         """
 
-        credit_data = self._session.request(
+        credit_data = Utils.parse_peerberry_items(self._session.request(
             url=f'{ENDPOINTS.LOANS_URI}/{loan_id}',
-        )
+        ))
 
         schedule_data = credit_data['schedule']['data']
 
