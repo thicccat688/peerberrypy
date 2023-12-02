@@ -126,14 +126,26 @@ class API:
         import pandas as pd
         return pd.DataFrame(profit_overview)
 
-    def get_investment_status(self) -> dict:
+
+    def get_investment_status(
+            self,
+            raw: bool = False,
+    ) -> 'Union[pd.DataFrame, list]':
+
         """
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
         :return: Percentage of funds in current loans and late loans (In 1-15, 16-30, and 31-60 day intervals)
         """
 
         investment_status = Utils.parse_peerberry_items(self._session.request(
             url=ENDPOINTS.INVESTMENTS_STATUS_URI
         ))
+
+        if raw:
+            return investment_status
+
+        import pandas as pd
+        return pd.DataFrame(investment_status)
 
     def get_loans(
             self,
