@@ -156,7 +156,7 @@ class API:
             loan_types: Optional[List[str]] = None,
             sort: str = 'loan_amount',
             ascending_sort: bool = False,
-            group_guarantee: Optional[bool] = None,
+            group_guarantee: bool = True,
             exclude_invested_loans: Optional[bool] = None,
             raw: bool = False,
     ) -> 'Union[pd.DataFrame, List[dict]]':
@@ -179,7 +179,9 @@ class API:
         :param raw: Returns python list if True or pandas DataFrame if False (False by default)
         :return: All available loans for investment according to specified parameters
         """
+
         argv = locals()
+
         if quantity <= 0:
             raise ValueError('You need to fetch at least 1 loan.')
 
@@ -189,6 +191,7 @@ class API:
         argv.pop('quantity', None)
         argv.pop('raw', None)
         argv.pop('start_page', None)
+
         do_get_loans_page = functools.partial(self.get_loans_page, **argv)
 
         loans = []
@@ -198,7 +201,9 @@ class API:
 
         for page_num in range(total_pages):
             remaining_items = quantity - (page_num * max_page_size)
+
             page_size = min(remaining_items, max_page_size)
+
             loans_data = do_get_loans_page(page_num)['data']
 
             if len(loans_data) == 0:
