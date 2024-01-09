@@ -25,6 +25,7 @@ class API:
             password: Optional[str] = None,
             tfa_secret: Optional[str] = None,
             access_token: Optional[str] = None,
+            request_opts: Optional[dict] = None,
     ):
         """
         Peerberry API wrapper with all relevant Peerberry functionalities.
@@ -33,6 +34,7 @@ class API:
         :param tfa_secret: Base32 secret used for two-factor authentication
         :param access_token: Access token used to authenticate to the API (Optional; Only pass the JWT for it to work!)
         (Only mandatory if account has two-factor authentication enabled)
+        :param request_opts: Optional[dict] - Additional options for :any:`requests.sessions.Session.request()`.
         """
 
         self.email = email
@@ -40,7 +42,7 @@ class API:
         self._tfa_secret = tfa_secret
 
         # Initialize HTTP session & authenticate to API
-        self._session = RequestHandler()
+        self._session = RequestHandler(request_opts or {})
         self.access_token = access_token
 
         if not access_token:
