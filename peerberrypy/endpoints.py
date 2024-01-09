@@ -7,11 +7,14 @@ class ENDPOINTS:
 
     OVERVIEW_URI = f'{BASE_URI}/v1/investor/overview'
     PROFIT_OVERVIEW_URI = f'{BASE_URI}/v1/investor/overview/profit'
+    INVESTMENT_TYPES_OVERVIEW_URI = f'{BASE_URI}/v1/investor/overview/investment_types'
+    ORIGINATORS_OVERVIEW_URI = f'{BASE_URI}/v1/investor/overview/originators'
+    COUNTRIES_OVERVIEW_URI = f'{BASE_URI}/v1/investor/overview/countries'
+    
     LOYALTY_URI = f'{BASE_URI}/v1/investor/loyalty'
 
     INVESTMENTS_STATUS_URI = f'{BASE_URI}/v2/investor/overview/investment_statuses/current'
     INVESTMENTS_URI = f'{BASE_URI}/v1/investor/investments'
-    INVESTMENTS_ORIGINATORS_URI = f'{BASE_URI}/v1/investor/overview/originators'
     INVESTMENTS_AGREEMENT_URI = f'{BASE_URI}/v1/investments'
 
     LOANS_URI = f'{BASE_URI}/v1/loans'

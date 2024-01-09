@@ -4,31 +4,27 @@ from decimal import Decimal, DecimalException
 
 class Utils:
     @staticmethod
-    def parse_peerberry_items(__obj: dict) -> dict:
-        parsed_obj = copy.deepcopy(__obj)
-
-        for k, v in __obj.items():
-            if isinstance(v, dict):
-                nested_obj = {}
-
-                for k1, v1 in v.items():
-                    try:
-                        nested_obj[k1] = Decimal.from_float(v1) if isinstance(v1, float) else Decimal(v1)
-
-                    except (ValueError, TypeError, DecimalException):
-                        parsed_obj[k1] = v1
-
-                parsed_obj[k] = nested_obj
-
-                continue
-
+    def parse_peerberry_items(obj: dict) -> dict:
+        """Parse string represenations of decimals and floats into Decimal"""
+        if isinstance(obj, list):
+            return [Utils.parse_peerberry_items(item) for item in obj]
+        elif isinstance(obj, dict):
+            return {k: Utils.parse_peerberry_items(v) for k, v in obj.items()}
+        elif isinstance(obj, (Decimal, int)):
+            return obj
+        elif isinstance(obj, float):
+            return Decimal.from_float(obj)
+        elif isinstance(obj, str) and obj.startswith('+'):
+            # preserve phone numbers
+            return obj
+        else:
             try:
-                parsed_obj[k] = Decimal.from_float(v) if isinstance(v, float) else Decimal(v)
-
+                return Decimal(obj)
             except (ValueError, TypeError, DecimalException):
-                parsed_obj[k] = v
+                pass
 
-        return parsed_obj
+        return obj
+
 
     @staticmethod
     def parse_peerberry_originators(__obj: list) -> dict:

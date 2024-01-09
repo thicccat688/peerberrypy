@@ -57,12 +57,16 @@ class API:
 
         self.login()
 
+
     def get_profile(self) -> dict:
         """
         :return: Basic information, accounts & balance information
         """
 
-        return Utils.parse_peerberry_items(self._session.request(url=ENDPOINTS.PROFILE_URI))
+        return Utils.parse_peerberry_items(self._session.request(
+            url=ENDPOINTS.PROFILE_URI
+        ))
+
 
     def get_loyalty_tier(self) -> dict:
         """
@@ -86,16 +90,16 @@ class API:
             'min_amount': top_available_tier['minAmount'],
         }
 
+
     def get_overview(self) -> dict:
         """
         :return: Available balance, total invested, total profit, current investments, net annual return, etc.
         """
 
-        return Utils.parse_peerberry_items(
-            self._session.request(
-                url=ENDPOINTS.OVERVIEW_URI,
-            )
-        )
+        return Utils.parse_peerberry_items(self._session.request(
+            url=ENDPOINTS.OVERVIEW_URI
+        ))
+
 
     def get_profit_overview(
             self,
@@ -117,29 +121,100 @@ class API:
         if periodicity not in periodicities:
             raise InvalidPeriodicity(f'Periodicity must be one of the following: {", ".join(periodicities)}')
 
-        profit_overview = self._session.request(
+        profit_overview = Utils.parse_peerberry_items(self._session.request(
             url=f'{ENDPOINTS.PROFIT_OVERVIEW_URI}/{start_date}/{end_date}/{periodicity}',
-        )
-
+        ))
+        
         if raw:
             return profit_overview
 
         import pandas as pd
         return pd.DataFrame(profit_overview)
 
-    def get_investment_status(self) -> dict:
+
+    def get_investment_status(
+            self,
+            raw: bool = False,
+    ) -> 'Union[pd.DataFrame, list]':
+
         """
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
         :return: Percentage of funds in current loans and late loans (In 1-15, 16-30, and 31-60 day intervals)
         """
 
-        return Utils.parse_peerberry_items(self._session.request(url=ENDPOINTS.INVESTMENTS_STATUS_URI))
+        investment_status = Utils.parse_peerberry_items(self._session.request(
+            url=ENDPOINTS.INVESTMENTS_STATUS_URI
+        ))
 
-    def get_investment_originators_overview(self) -> dict:
+        if raw:
+            return investment_status
+
+        import pandas as pd
+        return pd.DataFrame(investment_status)
+
+    
+    def get_overview_originators(
+            self,
+            raw: bool = False,
+    ) -> 'Union[pd.DataFrame, list]':
         """
-        :return: Percentage of funds in current loan originators
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: Originators overview for portfolio
         """
 
-        return Utils.parse_peerberry_originators(self._session.request(url=ENDPOINTS.INVESTMENTS_ORIGINATORS_URI))
+        overview_originators = Utils.parse_peerberry_originators(
+            Utils.parse_peerberry_items(self._session.request(
+                url=f'{ENDPOINTS.ORIGINATORS_OVERVIEW_URI}',
+            ))
+        )
+
+        if raw:
+            return overview_originators
+
+        import pandas as pd
+        return pd.DataFrame(overview_originators)
+
+
+    def get_overview_investment_types(
+            self,
+            raw: bool = False,
+    ) -> 'Union[pd.DataFrame, list]':
+        """
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: Investment types overview for portfolio
+        """
+
+        investment_types = Utils.parse_peerberry_items(self._session.request(
+            url=f'{ENDPOINTS.INVESTMENT_TYPES_OVERVIEW_URI}',
+        ))
+
+        if raw:
+            return investment_types
+
+        import pandas as pd
+        return pd.DataFrame(investment_types)
+
+
+    def get_overview_countries(
+            self,
+            raw: bool = False,
+    ) -> 'Union[pd.DataFrame, list]':
+        """
+        :param raw: Returns python list if True or pandas DataFrame if False (False by default)
+        :return: Country overview for portfolio
+        """
+
+        overview_countries = Utils.parse_peerberry_items(self._session.request(
+            url=f'{ENDPOINTS.COUNTRIES_OVERVIEW_URI}',
+        ))
+
+
+        if raw:
+            return overview_countries
+
+        import pandas as pd
+        return pd.DataFrame(overview_countries)
+        
 
     def get_loans(
             self,
@@ -217,6 +292,7 @@ class API:
 
         import pandas as pd
         return pd.DataFrame(loans)
+
 
     def get_loans_page(
             self,
@@ -335,6 +411,7 @@ class API:
             params=loan_params,
         )
 
+
     def get_loan_details(
             self,
             loan_id: int,
@@ -346,19 +423,27 @@ class API:
         :return: The borrower's data, the loan's data, and the repayment schedule
         """
 
-        credit_data = self._session.request(
+        credit_data = Utils.parse_peerberry_items(self._session.request(
             url=f'{ENDPOINTS.LOANS_URI}/{loan_id}',
-        )
+        ))
+
+        loan_details = {
+            'borrower': credit_data.get('borrower'),
+            'loan': credit_data.get('loan'),
+            'originator': credit_data.get('originator'),
+            'pledge': credit_data.get('pledge')
+        }
 
         schedule_data = credit_data['schedule']['data']
 
-        return {
-            'borrower_data': credit_data.get('borrower'),
-            'loan_data': credit_data.get('loan'),
-            'originator': credit_data.get('originator'),
-            'pledge': credit_data.get('pledge'),
-            'schedule_data': schedule_data if raw else pd.DataFrame(schedule_data),
-        }
+        if raw:
+            loan_details['schedule_data'] = schedule_data
+        else:
+            import pandas as pd
+            loan_details['schedule_data'] = pd.DataFrame(schedule_data)
+
+        return loan_details
+
 
     def get_agreement(self, loan_id: int, lang: str = 'en') -> bytes:
         """
@@ -373,6 +458,7 @@ class API:
         )
 
         return agreement_bytes
+
 
     def purchase_loan(
             self,
@@ -391,6 +477,7 @@ class API:
             data={'amount': str(amount)},
             exception_type=InsufficientFunds,
         )
+
 
     def get_investments(
             self,
@@ -496,6 +583,7 @@ class API:
         import pandas as pd
         return pd.DataFrame(investments_data['data'])
 
+
     def get_mass_investments(
             self,
             quantity: int = 100000000000,
@@ -557,6 +645,7 @@ class API:
             sheet_name=0,
         ).sort_values(by=sort, ascending=ascending_sort)[0:quantity]
 
+
     def get_account_summary(
             self,
             start_date: date,
@@ -594,6 +683,7 @@ class API:
             },
             'currency': summary_data.get('currency'),
         }
+
 
     def get_transactions(
             self,
@@ -655,6 +745,7 @@ class API:
 
         import pandas as pd
         return pd.DataFrame(transactions_data)
+
 
     def get_mass_transactions(
             self,
@@ -729,6 +820,7 @@ class API:
         ).sort_values(by=sort, ascending=ascending_sort)
         return parsed_transactions_data[0:quantity]
 
+
     def login(self) -> str:
         """
         :return: Access token to authenticate to Peerberry API
@@ -786,6 +878,7 @@ class API:
         # Set authorization header with JWT bearer token
         return f'Bearer {self.access_token}'
 
+
     def logout(self) -> str:
         """
         :return: Success message upon logging out.
@@ -802,9 +895,11 @@ class API:
 
         return 'Successfully logged out.'
 
+
     @staticmethod
     def get_countries() -> dict:
         return CONSTANTS.get_countries()
+
 
     @staticmethod
     def get_originators() -> dict:
