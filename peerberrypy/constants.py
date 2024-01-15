@@ -15,6 +15,8 @@ class CONSTANTS:
 
     MAX_LOAN_PAGE_SIZE = 40
 
+    MAX_INVESTMENT_PAGE_SIZE = 40
+
     LOAN_TYPES_ID = {
         'short_term': 1,
         'long_term': 2,

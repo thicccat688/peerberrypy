@@ -79,6 +79,14 @@ class API:
         # Get the highest unlocked tier
         top_available_tier = unlocked_tiers[-1] if len(unlocked_tiers) > 0 else None
 
+        if not top_available_tier:
+            return {
+                'tier': None,
+                'extra_return': None,
+                'max_amount': None,
+                'min_amount': None,
+            }
+
         return {
             'tier': top_available_tier['title'].rstrip() if top_available_tier else None,
             'extra_return': f'{top_available_tier["percent"]}%',
@@ -352,6 +360,9 @@ class API:
 
         schedule_data = credit_data['schedule']['data']
 
+        if not raw:
+            import pandas as pd
+
         return {
             'borrower_data': credit_data.get('borrower'),
             'loan_data': credit_data.get('loan'),
@@ -431,6 +442,9 @@ class API:
 
         if quantity <= 0:
             raise ValueError('You need to fetch at least 1 investment.')
+
+        if quantity > CONSTANTS.MAX_INVESTMENT_PAGE_SIZE:
+            raise ValueError(f'You can fetch at most {CONSTANTS.MAX_INVESTMENT_PAGE_SIZE} investments.')
 
         sort_types = CONSTANTS.CURRENT_INVESTMENT_SORT_TYPES if current else CONSTANTS.FINISHED_INVESTMENT_SORT_TYPES
 

@@ -1,6 +1,5 @@
 import unittest.mock
 from decimal import Decimal
-from tests.constants import CONSTANTS
 from peerberrypy.api import API
 
 from datetime import date
@@ -13,6 +12,9 @@ peerberry_client = API(
     password=os.getenv(key='PEERBERRY_PASSWORD'),
     tfa_secret=os.getenv(key='PEERBERRY_TFA_SECRET'),
 )
+
+current_year = date.today().strftime('%Y')
+next_year = (date.today() + pd.DateOffset(years=1)).strftime('%Y')
 
 
 def test_profile():
@@ -71,7 +73,7 @@ def test_loan_agreement():
 def test_investments():
     assert isinstance(
         peerberry_client.get_investments(
-            quantity=100,
+            quantity=40,
             current=True,
             max_interest_rate=Decimal(20),
             min_interest_rate=Decimal(10),
@@ -82,7 +84,7 @@ def test_investments():
 
     assert isinstance(
         peerberry_client.get_investments(
-            quantity=100,
+            quantity=40,
             current=False,
             max_interest_rate=Decimal(20),
             min_interest_rate=Decimal(10),
@@ -97,8 +99,8 @@ def test_investments():
 def test_summary():
     assert isinstance(
         peerberry_client.get_account_summary(
-            start_date=CONSTANTS.START_DATE,
-            end_date=CONSTANTS.END_DATE,
+            start_date=date(int(current_year), 1, 1),
+            end_date=date(int(next_year), 1, 1),
         ),
         dict,
     )
@@ -115,8 +117,8 @@ def test_mass_transactions():
     assert isinstance(
         peerberry_client.get_mass_transactions(
             quantity=1000,
-            start_date=CONSTANTS.START_DATE,
-            end_date=CONSTANTS.END_DATE,
+            start_date=date(int(current_year), 1, 1),
+            end_date=date(int(next_year), 1, 1),
         ),
         pd.DataFrame,
     )
